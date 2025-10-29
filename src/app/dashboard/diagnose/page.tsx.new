@@ -1,0 +1,235 @@
+'use client';
+
+import { useState, useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
+import Image from 'next/image';
+import toast from 'react-hot-toast';
+
+export default function DiagnosePage() {
+  const [image, setImage] = useState<string | null>(null);
+  const [plantType, setPlantType] = useState('');
+  const [symptoms, setSymptoms] = useState('');
+
+  // Handle file drop
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (file && file.type.startsWith('image/')) {
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        toast.error('Image size should be less than 10MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage(reader.result as string);
+        toast.success('Image uploaded successfully!');
+      };
+      reader.readAsDataURL(file);
+    } else {
+      toast.error('Please upload a valid image file (PNG, JPG)');
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/png': ['.png'],
+      'image/jpeg': ['.jpg', '.jpeg']
+    },
+    maxFiles: 1,
+    maxSize: 10 * 1024 * 1024 // 10MB
+  });
+
+  const handleDiagnose = async () => {
+    if (!image) {
+      toast.error('Please upload a plant image');
+      return;
+    }
+    if (!plantType.trim()) {
+      toast.error('Please enter the plant type');
+      return;
+    }
+    if (!symptoms.trim()) {
+      toast.error('Please describe the symptoms');
+      return;
+    }
+
+    toast.loading('Analyzing plant...', { id: 'analyze' });
+    // TODO: Implement the actual API call here
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      toast.success('Analysis complete!', { id: 'analyze' });
+      // Handle the diagnosis result
+    } catch (error) {
+      toast.error('Failed to analyze plant', { id: 'analyze' });
+      console.error('Error:', error);
+    }
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <h1 className="text-2xl font-bold text-green-800 mb-2">Plant Diagnosis</h1>
+      <p className="text-gray-600 mb-8">
+        Upload a photo and describe symptoms for AI-powered plant health analysis
+      </p>
+
+      <div className="grid md:grid-cols-2 gap-8">
+        {/* Plant Image Upload Section */}
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2 mb-4">
+            <svg
+              className="w-6 h-6 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            <h2 className="text-lg font-semibold text-gray-800">Plant Image</h2>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">
+            Upload a clear photo of your plant showing the problem area
+          </p>
+
+          <div
+            {...getRootProps()}
+            className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
+              ${isDragActive 
+                ? 'border-green-500 bg-green-50' 
+                : 'border-gray-300 hover:border-green-400'
+              } ${image ? 'border-green-500' : ''}`}
+          >
+            <input {...getInputProps()} />
+            {image ? (
+              <div className="relative aspect-video">
+                <Image
+                  src={image}
+                  alt="Uploaded plant"
+                  fill
+                  className="object-contain rounded-lg"
+                />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setImage(null);
+                  }}
+                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full 
+                    hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 
+                    focus:ring-red-500"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex justify-center">
+                  <svg
+                    className="w-12 h-12 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                </div>
+                <div className="text-gray-600">
+                  <p className="font-medium">Click to upload or drag and drop</p>
+                  <p className="text-sm text-gray-500 mt-1">PNG, JPG up to 10MB</p>
+                </div>
+                <button
+                  type="button"
+                  className="px-4 py-2 text-sm font-medium text-green-600 bg-green-100 
+                    rounded-lg hover:bg-green-200 focus:outline-none focus:ring-2 
+                    focus:ring-offset-2 focus:ring-green-500"
+                >
+                  Select Image
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Plant Information Section */}
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2 mb-4">
+            <svg
+              className="w-6 h-6 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <h2 className="text-lg font-semibold text-gray-800">Plant Information</h2>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">
+            Provide details about your plant and observed symptoms
+          </p>
+
+          <div className="space-y-6">
+            <div>
+              <label htmlFor="plantType" className="block text-sm font-medium text-gray-700">
+                Plant Type
+              </label>
+              <input
+                type="text"
+                id="plantType"
+                value={plantType}
+                onChange={(e) => setPlantType(e.target.value)}
+                placeholder="e.g., Tomato, Rose, Corn..."
+                className="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 
+                  rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 
+                  focus:border-transparent transition-colors"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="symptoms" className="block text-sm font-medium text-gray-700">
+                Symptoms Description
+              </label>
+              <textarea
+                id="symptoms"
+                value={symptoms}
+                onChange={(e) => setSymptoms(e.target.value)}
+                placeholder="Describe what you've observed: leaf discoloration, spots, wilting, growth issues, etc."
+                rows={4}
+                className="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 
+                  rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 
+                  focus:border-transparent transition-colors resize-none"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Diagnose Button */}
+      <div className="mt-8 flex justify-center">
+        <button
+          onClick={handleDiagnose}
+          className="px-8 py-3 bg-green-600 text-white rounded-lg 
+            hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 
+            focus:ring-offset-2 focus:ring-green-500 font-medium"
+        >
+          Diagnose Plant
+        </button>
+      </div>
+    </div>
+  );
+}

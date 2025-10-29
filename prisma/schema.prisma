@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  diagnoses Diagnosis[]
+}
+
+model Diagnosis {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  plantType    String
+  symptoms     String
+  imageUrl     String?
+  diagnosis    String?       @db.Text
+  causes       String[]
+  treatment    String[]
+  prevention   String[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  messages     ChatMessage[]
+}
+
+model ChatMessage {
+  id           String     @id @default(cuid())
+  diagnosisId  String
+  diagnosis    Diagnosis  @relation(fields: [diagnosisId], references: [id])
+  role         String
+  content      String
+  createdAt    DateTime   @default(now())
+}
