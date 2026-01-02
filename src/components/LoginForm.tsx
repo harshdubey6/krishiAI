@@ -2,13 +2,11 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 
 export default function LoginForm() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState({
     email: '',
@@ -76,9 +74,9 @@ export default function LoginForm() {
       }
 
       toast.success('Login successful! Redirecting...');
+      // Use window.location for reliable redirect in production
       setTimeout(() => {
-        router.push('/dashboard');
-        router.refresh();
+        window.location.href = '/dashboard';
       }, 1500);
     } catch {
       toast.error('An error occurred during login');
