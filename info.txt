@@ -1,0 +1,160 @@
+# 🌾 KrishiAI - Agricultural Intelligence Platform
+
+## 📊 Market Price Data Integration
+
+### Current Implementation:
+The market prices feature is now integrated with **AGMARKNET API** - India's official government agricultural market data source.
+
+### Data Flow:
+1. **Primary Source**: AGMARKNET API (data.gov.in)
+   - Real-time mandi prices across India
+   - 100+ crops supported
+   - Government-verified data
+
+2. **Fallback System**: Mock data (automatic)
+   - Activates if API key is missing
+   - Activates if API is down/slow
+   - 8 sample crops with realistic prices
+
+### Files Modified:
+- `src/lib/market-prices.ts` - Core API integration
+- `src/app/api/market-prices/route.ts` - Async API handlers
+- `.env.local` - API key configuration
+- `AGMARKNET_INTEGRATION.md` - Complete setup guide
+
+### How to Connect Real API:
+1. **Register** at https://data.gov.in/
+2. **Request API Access** for AGMARKNET resource
+3. **Get API Key** (24-48 hours approval)
+4. **Add to .env.local**: 
+   ```
+   AGMARKNET_API_KEY="your-key-here"
+   ```
+5. **Restart server**: `npm run dev`
+
+### Current Status:
+✅ API integration code complete
+✅ Fallback mock data active
+✅ All features working
+⏳ Waiting for AGMARKNET API key
+
+### Testing:
+- Visit `/dashboard/prices`
+- Search crops by name/state
+- Use profit calculator
+- View price trends
+
+### Documentation:
+- Full setup guide: `AGMARKNET_INTEGRATION.md`
+- API details, troubleshooting, alternatives included
+
+---
+
+## � Farmer Guide Feature
+
+### Overview:
+Complete crop cultivation guides with AI-powered content generation.
+
+### Features:
+- **Comprehensive Guides**: Sowing, irrigation, fertilizer, pest management, harvesting
+- **AI-Generated Content**: Uses Google Gemini for crops not in database
+- **Bilingual Support**: English and Hindi
+- **Interactive UI**: Expandable sections, search functionality
+- **Popular Crops**: Wheat, Rice, Cotton, Sugarcane, Maize, Potato, Tomato, Onion
+
+### Files Created:
+- `src/app/api/crop-guide/route.ts` - API endpoint for crop guides
+- `src/app/dashboard/guide/page.tsx` - Farmer guide UI page
+- Updated `src/components/Sidebar.tsx` - Added guide link
+- Updated `src/app/dashboard/page.tsx` - Added guide card
+
+### Database Model:
+```prisma
+model CropGuide {
+  cropName   String   @unique
+  overview   String
+  climate    String?
+  soilType   String?
+  sowing     String?
+  irrigation String?
+  fertilizer String?
+  pests      String?
+  diseases   String?
+  harvesting String?
+  yield      String?
+  videoUrls  String[]
+  imageUrl   String?
+  language   String   @default("en")
+}
+```
+
+### How It Works:
+1. **Database First**: Checks for existing guide in database
+2. **AI Fallback**: If not found, generates guide using Gemini AI
+3. **Structured Content**: Sections for climate, soil, sowing, etc.
+4. **User-Friendly**: Expandable sections, mobile responsive
+
+### Usage:
+1. Navigate to `/dashboard/guide`
+2. Search or select a crop from the list
+3. View comprehensive cultivation guide
+4. Each section expands/collapses for easy reading
+
+---
+
+## 🚀 Platform Features
+
+### 1. Enhanced Crop Diagnosis
+- AI-powered disease detection (Google Gemini 2.5 Flash)
+- Severity analysis, confidence scores
+- Treatment recommendations with cost estimates
+- Bilingual support (English/Hindi)
+
+### 2. Weather Forecast
+- 7-day weather predictions
+- Crop-specific advisories
+- Temperature, rainfall, humidity tracking
+- WeatherAPI.com integration
+
+### 3. Market Prices (AGMARKNET)
+- Real-time mandi prices
+- State-wise crop rates
+- Profit calculator
+- 30-day price trends
+- Crop recommendations
+
+### 4. Farmer Guide (NEW)
+- Complete crop cultivation guides
+- AI-generated content
+- Pest and disease management
+- Harvesting and yield information
+
+### 5. Mobile-Responsive Design
+- Touch-friendly navigation
+- Hamburger menu sidebar
+- Responsive layouts
+- Farmer-focused UI/UX
+
+---
+
+## 🔧 Tech Stack
+- Next.js 15.5.3 + React 19
+- PostgreSQL (Prisma ORM)
+- NextAuth.js authentication
+- Google Gemini AI
+- WeatherAPI.com
+- AGMARKNET API (data.gov.in)
+- Tailwind CSS 4
+
+---
+
+## 📝 Next Steps
+1. Obtain AGMARKNET API key
+2. Test with real market data
+3. Add more crop guides to database
+4. Deploy to production
+5. Collect user feedback
+
+---
+
+**Last Updated**: December 31, 2025

@@ -13,7 +13,11 @@ interface NavItem {
   badge?: number;
 }
 
-export default function Sidebar() {
+interface SidebarProps {
+  onNavigate?: () => void;
+}
+
+export default function Sidebar({ onNavigate }: SidebarProps = {}) {
   const pathname = usePathname();
   const { data: session } = useSession();
 
@@ -37,7 +41,7 @@ export default function Sidebar() {
       ),
     },
     {
-      name: 'Diagnose',
+      name: 'Crop Diagnosis',
       href: '/dashboard/diagnose',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,25 +51,7 @@ export default function Sidebar() {
       ),
     },
     {
-      name: 'Plant DB',
-      href: '/dashboard/plant-db',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-        </svg>
-      ),
-    },
-    {
-      name: 'Farm Tips',
-      href: '/dashboard/farm-tips',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-        </svg>
-      ),
-    },
-    {
-      name: 'Weather',
+      name: 'Weather Forecast',
       href: '/dashboard/weather',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,41 +59,56 @@ export default function Sidebar() {
         </svg>
       ),
     },
+    {
+      name: 'Market Prices',
+      href: '/dashboard/prices',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        </svg>
+      ),
+    },
+    {
+      name: 'Farmer Guide',
+      href: '/dashboard/guide',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      ),
+    },
   ];
 
   return (
-    <div className="flex h-screen flex-col bg-white border-r shadow-lg">
+    <div className="flex h-screen flex-col bg-white border-r shadow-lg overflow-hidden">
       {/* Logo Section */}
-      <div className="p-6 border-b flex flex-col items-center">
-        <div className="relative w-28 h-28 mb-3">
-          <Image
-            src="/plant-logo.jpg"
-            alt="AI Plant Doctor"
-            fill
-            className="rounded-full object-cover shadow-md"
-            priority
-          />
+      <div className="p-4 sm:p-6 border-b flex flex-col items-center bg-gradient-to-br from-green-50 to-white">
+        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-green-600 rounded-full flex items-center justify-center mb-2 sm:mb-3 shadow-lg">
+          <svg className="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
         </div>
-        <h1 className="text-xl font-bold text-green-600">AI Plant Doctor</h1>
-        <p className="text-sm text-gray-500">Your Smart Farming Assistant</p>
+        <h1 className="text-xl sm:text-2xl font-bold text-green-600">KrishiAI</h1>
+        <p className="text-xs sm:text-sm text-gray-500 mt-1">Farmer's Platform</p>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 sm:px-4 py-4 sm:py-6 space-y-1 overflow-y-auto">
         {navigation.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all
+              onClick={onNavigate}
+              className={`flex items-center gap-3 px-3 sm:px-4 py-3 sm:py-3.5 rounded-lg transition-all touch-manipulation active:scale-95
                 ${isActive 
                   ? 'bg-green-600 text-white shadow-md' 
-                  : 'text-gray-600 hover:bg-green-50 hover:text-green-600'
+                  : 'text-gray-600 hover:bg-green-50 hover:text-green-600 active:bg-green-100'
                 }`}
             >
-              <span className="w-6 h-6">{item.icon}</span>
-              <span className="font-medium">{item.name}</span>
+              <span className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0">{item.icon}</span>
+              <span className="font-medium text-sm sm:text-base">{item.name}</span>
               {item.badge && (
                 <span className={`ml-auto px-2 py-0.5 text-xs rounded-full
                   ${isActive ? 'bg-white text-green-600' : 'bg-red-100 text-red-600'}`}>
@@ -120,22 +121,22 @@ export default function Sidebar() {
       </nav>
 
       {/* User Profile & Logout */}
-      <div className="border-t p-4">
-        <div className="mb-4 px-4 py-2">
-          <p className="text-sm font-medium text-gray-900">{session?.user?.name}</p>
-          <p className="text-xs text-gray-500">{session?.user?.email}</p>
+      <div className="border-t p-3 sm:p-4 bg-gradient-to-br from-gray-50 to-white">
+        <div className="mb-3 sm:mb-4 px-3 sm:px-4 py-2 bg-white rounded-lg shadow-sm">
+          <p className="text-sm font-medium text-gray-900 truncate">{session?.user?.name}</p>
+          <p className="text-xs text-gray-500 truncate">{session?.user?.email}</p>
         </div>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 
-            rounded-lg transition-colors"
+          className="w-full flex items-center gap-3 px-3 sm:px-4 py-3 text-red-600 hover:bg-red-50 active:bg-red-100
+            rounded-lg transition-all touch-manipulation active:scale-95"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
               d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" 
             />
           </svg>
-          <span className="font-medium">Logout</span>
+          <span className="font-medium text-sm sm:text-base">Logout</span>
         </button>
       </div>
     </div>

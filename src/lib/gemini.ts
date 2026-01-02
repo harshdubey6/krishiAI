@@ -13,17 +13,27 @@ export async function analyzePlantImage(imageBase64: string, plantType: string, 
     // Remove data:image/jpeg;base64, prefix if present
     const base64Image = imageBase64.replace(/^data:image\/[a-z]+;base64,/, '');
     
-    const prompt = `Analyze this plant image. Plant type: ${plantType}. Symptoms described: ${symptoms}.
+    const prompt = `You are an expert agricultural scientist analyzing crop health issues for farmers.
+    
+    Analyze this crop image. Crop type: ${plantType}. Symptoms described: ${symptoms}.
     
     Respond with a JSON object containing:
     {
-      "diagnosis": "Brief diagnosis of the problem",
-      "causes": ["List of potential causes"],
-      "treatment": ["List of treatment steps"],
-      "prevention": ["List of preventive measures"]
+      "diagnosis": "Clear diagnosis of the crop problem in simple farmer-friendly language",
+      "severity": "mild/moderate/severe - assess the severity level",
+      "confidence": 85.5 (your confidence score 0-100),
+      "causes": ["List 2-4 potential causes"],
+      "treatment": ["List 3-5 practical treatment steps with specific products/methods"],
+      "prevention": ["List 2-4 preventive measures for future"],
+      "estimatedCost": 500 (estimated treatment cost in INR, or null if unknown)
     }
     
-    IMPORTANT: Ensure the response is valid JSON. Do not include any text outside the JSON object.`;
+    IMPORTANT: 
+    - Use simple, farmer-friendly language
+    - Be specific about products and dosages
+    - Provide actionable advice
+    - Ensure valid JSON format
+    - Do not include any text outside the JSON object`;
 
     const result = await model.generateContent([
       prompt,
@@ -50,12 +60,15 @@ export async function analyzePlantImage(imageBase64: string, plantType: string, 
     try {
       const parsed = JSON.parse(jsonStr);
       
-      // Ensure the response has the expected structure
+      // Ensure the response has the expected structure with new fields
       const structured = {
         diagnosis: typeof parsed.diagnosis === 'string' ? parsed.diagnosis : 'No diagnosis provided',
+        severity: parsed.severity || 'moderate',
+        confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 75,
         causes: Array.isArray(parsed.causes) ? parsed.causes : [parsed.causes].filter(Boolean),
         treatment: Array.isArray(parsed.treatment) ? parsed.treatment : [parsed.treatment].filter(Boolean),
-        prevention: Array.isArray(parsed.prevention) ? parsed.prevention : [parsed.prevention].filter(Boolean)
+        prevention: Array.isArray(parsed.prevention) ? parsed.prevention : [parsed.prevention].filter(Boolean),
+        estimatedCost: parsed.estimatedCost || null
       };
 
       return structured;
@@ -64,9 +77,12 @@ export async function analyzePlantImage(imageBase64: string, plantType: string, 
       // If we can't parse as JSON, create a structured response from the text
       return {
         diagnosis: text.split('\n')[0] || 'Failed to parse diagnosis',
+        severity: 'moderate',
+        confidence: 60,
         causes: [text.match(/causes?:?\s*(.*)/i)?.[1] || 'Unknown cause'],
         treatment: [text.match(/treatment:?\s*(.*)/i)?.[1] || 'See diagnosis for details'],
-        prevention: [text.match(/prevent(?:ion)?:?\s*(.*)/i)?.[1] || 'No prevention steps provided']
+        prevention: [text.match(/prevent(?:ion)?:?\s*(.*)/i)?.[1] || 'No prevention steps provided'],
+        estimatedCost: null
       };
     }
   } catch (error) {

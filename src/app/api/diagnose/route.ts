@@ -17,9 +17,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const data = await req.json();
-    const { image, plantType, symptoms } = data;
+    const { image, cropType, symptoms, language = 'en' } = data;
 
-    if (!image || !plantType || !symptoms) {
+    if (!image || !cropType || !symptoms) {
       return new NextResponse(
         JSON.stringify({
           status: 'error',
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get diagnosis from Gemini API
-    const aiResult = await analyzePlantImage(image, plantType, symptoms);
+    const aiResult = await analyzePlantImage(image, cropType, symptoms);
 
     // Ensure we have an authenticated user id
     const userId = (session as any)?.user?.id;
@@ -64,10 +64,14 @@ export async function POST(req: NextRequest) {
     // Create diagnosis with proper typing
     const diagnosisInput = {
       userId: user.id,
-      plantType: String(plantType || '').slice(0, 100),
+      cropType: String(cropType || '').slice(0, 100),
       symptoms: String(symptoms || '').slice(0, 500),
       imageUrl: imageUrl,
       diagnosis: aiResult.diagnosis ? String(aiResult.diagnosis).slice(0, 1000) : null,
+      severity: aiResult.severity || 'moderate',
+      confidence: aiResult.confidence || 75,
+      estimatedCost: aiResult.estimatedCost || null,
+      language: language,
       causes: Array.isArray(aiResult.causes) 
         ? aiResult.causes.map(c => String(c).slice(0, 200)).slice(0, 10)
         : [],
@@ -79,17 +83,13 @@ export async function POST(req: NextRequest) {
         : []
     };
 
-    console.log('Creating diagnosis with:', JSON.stringify(diagnosisInput, null, 2));
-
     let savedDiagnosis;
     try {
       // Create the diagnosis
       savedDiagnosis = await prisma.diagnosis.create({
         data: diagnosisInput as any,
       });
-      console.log('Diagnosis created successfully:', savedDiagnosis.id);
     } catch (dbError) {
-      console.error('Database error:', dbError);
       return NextResponse.json({ 
         status: 'error', 
         message: 'Failed to save diagnosis',

@@ -11,29 +11,45 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  diagnoses Diagnosis[]
+  id            String   @id @default(cuid())
+  email         String?  @unique
+  phone         String?  @unique
+  password      String
+  name          String
+  role          String   @default("farmer")
+  language      String   @default("en")
+  location      String?
+  state         String?
+  district      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  diagnoses     Diagnosis[]
+  farms         Farm[]
+  cropListings  CropListing[]
+  orders        Order[]
+  weatherLogs   WeatherLog[]
 }
 
 model Diagnosis {
-  id           String        @id @default(cuid())
-  userId       String
-  user         User          @relation(fields: [userId], references: [id])
-  plantType    String
-  symptoms     String
-  imageUrl     String?
-  diagnosis    String?       @db.Text
-  causes       String[]
-  treatment    String[]
-  prevention   String[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  messages     ChatMessage[]
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  cropType        String
+  symptoms        String
+  imageUrl        String?
+  diagnosis       String?       @db.Text
+  severity        String?
+  confidence      Float?
+  causes          String[]
+  treatment       String[]
+  prevention      String[]
+  estimatedCost   Float?
+  language        String        @default("en")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  messages        ChatMessage[]
+  rating          DiagnosisRating?
 }
 
 model ChatMessage {
@@ -43,4 +59,135 @@ model ChatMessage {
   role         String
   content      String
   createdAt    DateTime   @default(now())
+}
+
+model Farm {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  name        String
+  location    String
+  latitude    Float?
+  longitude   Float?
+  areaAcres   Float
+  soilType    String?
+  waterSource String?
+  village     String?
+  district    String?
+  state       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CropListing {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  cropName      String
+  variety       String?
+  quantity      Float
+  unit          String   @default("quintal")
+  pricePerUnit  Float
+  negotiable    Boolean  @default(true)
+  quality       String?
+  organic       Boolean  @default(false)
+  location      String
+  state         String
+  district      String
+  harvestDate   DateTime?
+  availableFrom DateTime
+  images        String[]
+  description   String?  @db.Text
+  status        String   @default("active")
+  views         Int      @default(0)
+  orders        Order[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([cropName, state, status])
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  listingId       String
+  listing         CropListing @relation(fields: [listingId], references: [id])
+  buyerId         String
+  buyer           User        @relation(fields: [buyerId], references: [id])
+  quantity        Float
+  pricePerUnit    Float
+  totalAmount     Float
+  status          String      @default("pending")
+  deliveryType    String?
+  deliveryAddress String?
+  deliveryDate    DateTime?
+  notes           String?     @db.Text
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model MarketPrice {
+  id         String   @id @default(cuid())
+  cropName   String
+  state      String
+  district   String
+  market     String
+  minPrice   Float
+  maxPrice   Float
+  modalPrice Float
+  unit       String
+  date       DateTime
+  createdAt  DateTime @default(now())
+  
+  @@index([cropName, state, date])
+}
+
+model WeatherLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  location    String
+  latitude    Float
+  longitude   Float
+  temperature Float
+  feelsLike   Float?
+  humidity    Float?
+  rainfall    Float?
+  windSpeed   Float?
+  condition   String
+  forecast    Json?
+  alerts      String[]
+  loggedAt    DateTime @default(now())
+  createdAt   DateTime @default(now())
+  
+  @@index([location, loggedAt])
+}
+
+model DiagnosisRating {
+  id          String    @id @default(cuid())
+  diagnosisId String    @unique
+  diagnosis   Diagnosis @relation(fields: [diagnosisId], references: [id])
+  rating      Int
+  feedback    String?
+  helpful     Boolean?
+  createdAt   DateTime  @default(now())
+}
+
+model CropGuide {
+  id         String   @id @default(cuid())
+  cropName   String   @unique
+  overview   String   @db.Text
+  climate    String?  @db.Text
+  soilType   String?
+  sowing     String?  @db.Text
+  irrigation String?  @db.Text
+  fertilizer String?  @db.Text
+  pests      String?  @db.Text
+  diseases   String?  @db.Text
+  harvesting String?  @db.Text
+  yield      String?
+  videoUrls  String[]
+  imageUrl   String?
+  language   String   @default("en")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
