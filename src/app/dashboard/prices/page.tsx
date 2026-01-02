@@ -6,10 +6,28 @@ import { useRouter } from 'next/navigation';
 import { TrendingUp, TrendingDown, Minus, Calculator, IndianRupee, BarChart3 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+interface CalcResult {
+  estimatedRevenue: number;
+  profit: number;
+  profitMargin: number;
+}
+
+interface PriceItem {
+  cropName?: string;
+  market?: string;
+  currentPrice?: number;
+  previousPrice?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  unit?: string;
+  state?: string;
+  trend?: string;
+}
+
 export default function MarketPricesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [prices, setPrices] = useState<Array<{commodity: string; [key: string]: unknown}>>([]);
+  const [prices, setPrices] = useState<PriceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchCrop, setSearchCrop] = useState('');
   const [searchState, setSearchState] = useState('');
@@ -19,7 +37,7 @@ export default function MarketPricesPage() {
   const [calcCrop, setCalcCrop] = useState('');
   const [calcQuantity, setCalcQuantity] = useState('');
   const [calcCost, setCalcCost] = useState('');
-  const [calcResult, setCalcResult] = useState<{revenue: number; [key: string]: unknown} | null>(null);
+  const [calcResult, setCalcResult] = useState<CalcResult | null>(null);
 
   const fetchPrices = useCallback(async () => {
     setLoading(true);
@@ -99,10 +117,13 @@ export default function MarketPricesPage() {
     }
   };
 
-  const getPriceIndicator = (price: {minPrice: number; maxPrice: number; modalPrice: number}) => {
-    const avgPrice = (price.minPrice + price.maxPrice) / 2;
-    const diff = price.modalPrice - avgPrice;
-    const percentage = (diff / avgPrice) * 100;
+  const getPriceIndicator = (price: PriceItem) => {
+    const minPrice = price.minPrice || 0;
+    const maxPrice = price.maxPrice || 0;
+    const currentPrice = price.currentPrice || 0;
+    const avgPrice = (minPrice + maxPrice) / 2;
+    const diff = currentPrice - avgPrice;
+    const percentage = avgPrice > 0 ? (diff / avgPrice) * 100 : 0;
 
     if (percentage > 2) {
       return { icon: <TrendingUp className="w-5 h-5 text-green-600" />, color: 'text-green-600', text: 'High' };
@@ -224,18 +245,18 @@ export default function MarketPricesPage() {
               <div className="mt-6 grid md:grid-cols-3 gap-4">
                 <div className="bg-white/20 backdrop-blur rounded-xl p-4">
                   <div className="text-sm text-blue-100 mb-1">Estimated Revenue</div>
-                  <div className="text-2xl font-bold">₹{(calcResult as any)?.estimatedRevenue?.toLocaleString?.('en-IN') || 0}</div>
+                  <div className="text-2xl font-bold">₹{calcResult.estimatedRevenue?.toLocaleString('en-IN') || 0}</div>
                 </div>
                 <div className="bg-white/20 backdrop-blur rounded-xl p-4">
                   <div className="text-sm text-blue-100 mb-1">Estimated Profit</div>
-                  <div className={`text-2xl font-bold ${(calcResult as any)?.profit >= 0 ? 'text-green-300' : 'text-red-300'}`}>
-                    ₹{(calcResult as any)?.profit?.toLocaleString?.('en-IN') || 0}
+                  <div className={`text-2xl font-bold ${calcResult.profit >= 0 ? 'text-green-300' : 'text-red-300'}`}>
+                    ₹{calcResult.profit?.toLocaleString('en-IN') || 0}
                   </div>
                 </div>
                 <div className="bg-white/20 backdrop-blur rounded-xl p-4">
                   <div className="text-sm text-blue-100 mb-1">Profit Margin</div>
-                  <div className={`text-2xl font-bold ${(calcResult as any)?.profitMargin >= 0 ? 'text-green-300' : 'text-red-300'}`}>
-                    {(calcResult as any)?.profitMargin || 0}%
+                  <div className={`text-2xl font-bold ${calcResult.profitMargin >= 0 ? 'text-green-300' : 'text-red-300'}`}>
+                    {calcResult.profitMargin || 0}%
                   </div>
                 </div>
               </div>
@@ -250,7 +271,7 @@ export default function MarketPricesPage() {
           </div>
         ) : prices.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {prices.map((price: any, index: number) => {
+            {prices.map((price, index) => {
               const indicator = getPriceIndicator(price);
               return (
                 <div key={index} className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">

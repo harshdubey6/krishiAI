@@ -6,13 +6,41 @@ import { useRouter } from 'next/navigation';
 import { CloudSun, Droplets, Wind, Thermometer, AlertTriangle, Calendar, Sprout } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+interface WeatherAlert {
+  headline: string;
+  description: string;
+}
+
+interface WeatherData {
+  location?: string;
+  current?: {
+    temperature?: number;
+    humidity?: number;
+    windSpeed?: number;
+    condition?: string;
+  };
+  forecast?: Array<{
+    date?: string;
+    high?: number;
+    low?: number;
+    condition?: string;
+    rainChance?: number;
+  }>;
+  alerts?: WeatherAlert[];
+  advice?: {
+    irrigation?: string;
+    spraying?: string;
+    cropSpecific?: string[];
+  };
+}
+
 export default function WeatherPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [location, setLocation] = useState('');
   const [crop, setCrop] = useState('');
   const [loading, setLoading] = useState(false);
-  const [weatherData, setWeatherData] = useState<any>(null);
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -163,14 +191,14 @@ export default function WeatherPage() {
             </div>
 
             {/* Alerts */}
-            {weatherData?.alerts && (weatherData.alerts as any[]).length > 0 && (
+            {weatherData?.alerts && weatherData.alerts.length > 0 && (
               <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <AlertTriangle className="w-6 h-6 text-red-600" />
                   <h3 className="text-xl font-bold text-red-900">Weather Alerts / मौसम चेतावनी</h3>
                 </div>
                 <div className="space-y-3">
-                  {(weatherData.alerts as Array<{headline: string; description: string}>).map((alert, index) => (
+                  {weatherData.alerts.map((alert, index) => (
                     <div key={index} className="bg-white rounded-lg p-4">
                       <div className="font-semibold text-red-900 mb-1">{alert.headline}</div>
                       <div className="text-sm text-gray-700">{alert.description}</div>
@@ -208,11 +236,11 @@ export default function WeatherPage() {
               </div>
 
               {/* Crop Specific Advice */}
-              {weatherData?.advice?.cropSpecific && (weatherData.advice.cropSpecific as any[]).length > 0 && (
+              {weatherData?.advice?.cropSpecific && weatherData.advice.cropSpecific.length > 0 && (
                 <div className="mt-6 bg-yellow-50 rounded-xl p-5">
                   <h4 className="font-semibold text-yellow-900 mb-3">Crop-Specific Advice</h4>
                   <ul className="space-y-2">
-                    {(weatherData.advice.cropSpecific as string[]).map((tip: string, index: number) => (
+                    {weatherData.advice.cropSpecific.map((tip, index) => (
                       <li key={index} className="flex items-start gap-2 text-gray-700">
                         <span className="text-yellow-600 mt-1">•</span>
                         <span>{tip}</span>
