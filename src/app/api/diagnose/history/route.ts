@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { validateSession } from '@/lib/auth-utils';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const session = await validateSession();
   if (session instanceof NextResponse) return session;
 
   try {
     const items = await prisma.diagnosis.findMany({
-      where: { userId: (session as any).user.id },
+      where: { userId: (session as {user: {id: string}}).user.id },
       orderBy: { createdAt: 'desc' },
       include: { messages: { orderBy: { createdAt: 'asc' } } },
     });

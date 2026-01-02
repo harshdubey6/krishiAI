@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-const WEATHER_API_KEY = process.env.WEATHER_API_KEY || process.env.NEXT_PUBLIC_WEATHER_API_KEY;
-const WEATHER_API_URL = 'https://api.weatherapi.com/v1';
+const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY || process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
+const OPENWEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
+const OPENWEATHER_GEO_URL = 'https://api.openweathermap.org/geo/1.0';
 
 export interface WeatherData {
   location: string;
@@ -34,29 +35,50 @@ export interface WeatherAlert {
 
 export async function getCurrentWeather(location: string): Promise<WeatherData> {
   try {
-    if (!WEATHER_API_KEY) {
-      throw new Error('Weather API key not configured');
+    if (!OPENWEATHER_API_KEY) {
+      throw new Error('OpenWeather API key not configured');
     }
 
-    const response = await axios.get(`${WEATHER_API_URL}/current.json`, {
+    // Get coordinates from location name
+    const geoResponse = await axios.get(`${OPENWEATHER_GEO_URL}/direct`, {
       params: {
-        key: WEATHER_API_KEY,
         q: location,
-        aqi: 'no'
+        limit: 1,
+        appid: OPENWEATHER_API_KEY
       }
     });
 
-    const { current, location: loc } = response.data;
+    if (!geoResponse.data || geoResponse.data.length === 0) {
+      throw new Error('Location not found');
+    }
+
+    const { lat, lon, name, state, country } = geoResponse.data[0];
+
+    // Get current weather using coordinates
+    const weatherResponse = await axios.get(`${OPENWEATHER_BASE_URL}/weather`, {
+      params: {
+        lat,
+        lon,
+        appid: OPENWEATHER_API_KEY,
+        units: 'metric'
+      }
+    });
+
+    const { main, weather, wind, rain } = weatherResponse.data;
+
+    const locationName = state 
+      ? `${name}, ${state}, ${country}`
+      : `${name}, ${country}`;
 
     return {
-      location: `${loc.name}, ${loc.region}`,
-      temperature: current.temp_c,
-      feelsLike: current.feelslike_c,
-      humidity: current.humidity,
-      condition: current.condition.text,
-      windSpeed: current.wind_kph,
-      rainfall: current.precip_mm,
-      icon: current.condition.icon
+      location: locationName,
+      temperature: Math.round(main.temp),
+      feelsLike: Math.round(main.feels_like),
+      humidity: main.humidity,
+      condition: weather[0].description,
+      windSpeed: Math.round(wind.speed * 3.6), // Convert m/s to km/h
+      rainfall: rain?.['1h'] || 0,
+      icon: `https://openweathermap.org/img/wn/${weather[0].icon}@2x.png`
     };
   } catch (error) {
     console.error('Error fetching current weather:', error);
@@ -66,31 +88,69 @@ export async function getCurrentWeather(location: string): Promise<WeatherData> 
 
 export async function getWeatherForecast(location: string, days: number = 7): Promise<ForecastDay[]> {
   try {
-    if (!WEATHER_API_KEY) {
-      throw new Error('Weather API key not configured');
+    if (!OPENWEATHER_API_KEY) {
+      throw new Error('OpenWeather API key not configured');
     }
 
-    const response = await axios.get(`${WEATHER_API_URL}/forecast.json`, {
+    // Get coordinates from location name
+    const geoResponse = await axios.get(`${OPENWEATHER_GEO_URL}/direct`, {
       params: {
-        key: WEATHER_API_KEY,
         q: location,
-        days: Math.min(days, 14), // API supports up to 14 days
-        aqi: 'no',
-        alerts: 'no'
+        limit: 1,
+        appid: OPENWEATHER_API_KEY
       }
     });
 
-    const { forecast } = response.data;
+    if (!geoResponse.data || geoResponse.data.length === 0) {
+      throw new Error('Location not found');
+    }
 
-    return forecast.forecastday.map((day: any) => ({
-      date: day.date,
-      maxTemp: day.day.maxtemp_c,
-      minTemp: day.day.mintemp_c,
-      condition: day.day.condition.text,
-      icon: day.day.condition.icon,
-      chanceOfRain: day.day.daily_chance_of_rain,
-      humidity: day.day.avghumidity
-    }));
+    const { lat, lon } = geoResponse.data[0];
+
+    // Get 5-day forecast (OpenWeather free tier limitation)
+    const forecastResponse = await axios.get(`${OPENWEATHER_BASE_URL}/forecast`, {
+      params: {
+        lat,
+        lon,
+        appid: OPENWEATHER_API_KEY,
+        units: 'metric',
+        cnt: 40 // 5 days * 8 (3-hour intervals)
+      }
+    });
+
+    // Group forecasts by day
+    const dailyForecasts = new Map<string, {temps: number[]; conditions: string[]; icons: string[]; humidity: number[]; rain: number}>();
+    
+    forecastResponse.data.list.forEach((item: {dt_txt: string; main: {temp_max: number; temp_min: number; humidity: number}; weather: Array<{description: string; icon: string}>; pop: number; rain?: {'3h': number}}) => {
+      const date = item.dt_txt.split(' ')[0];
+      
+      if (!dailyForecasts.has(date)) {
+        dailyForecasts.set(date, { temps: [], conditions: [], icons: [], humidity: [], rain: 0 });
+      }
+      
+      const dayData = dailyForecasts.get(date)!;
+      dayData.temps.push(item.main.temp_max, item.main.temp_min);
+      dayData.conditions.push(item.weather[0].description);
+      dayData.icons.push(item.weather[0].icon);
+      dayData.humidity.push(item.main.humidity);
+      dayData.rain = Math.max(dayData.rain, item.pop * 100); // Probability of precipitation
+    });
+
+    // Convert to ForecastDay array
+    const forecast: ForecastDay[] = [];
+    dailyForecasts.forEach((data, date) => {
+      forecast.push({
+        date,
+        maxTemp: Math.round(Math.max(...data.temps)),
+        minTemp: Math.round(Math.min(...data.temps)),
+        condition: data.conditions[Math.floor(data.conditions.length / 2)], // Take middle condition
+        icon: `https://openweathermap.org/img/wn/${data.icons[Math.floor(data.icons.length / 2)]}@2x.png`,
+        chanceOfRain: Math.round(data.rain),
+        humidity: Math.round(data.humidity.reduce((a, b) => a + b, 0) / data.humidity.length)
+      });
+    });
+
+    return forecast.slice(0, Math.min(days, 5)); // OpenWeather free tier supports 5 days
   } catch (error) {
     console.error('Error fetching weather forecast:', error);
     throw new Error('Failed to fetch weather forecast');
@@ -99,40 +159,88 @@ export async function getWeatherForecast(location: string, days: number = 7): Pr
 
 export async function getWeatherAlerts(location: string): Promise<WeatherAlert[]> {
   try {
-    if (!WEATHER_API_KEY) {
-      throw new Error('Weather API key not configured');
+    if (!OPENWEATHER_API_KEY) {
+      throw new Error('OpenWeather API key not configured');
     }
 
-    const response = await axios.get(`${WEATHER_API_URL}/forecast.json`, {
+    // Get coordinates from location name
+    const geoResponse = await axios.get(`${OPENWEATHER_GEO_URL}/direct`, {
       params: {
-        key: WEATHER_API_KEY,
         q: location,
-        days: 1,
-        aqi: 'no',
-        alerts: 'yes'
+        limit: 1,
+        appid: OPENWEATHER_API_KEY
       }
     });
 
-    const { alerts } = response.data;
-
-    if (!alerts || !alerts.alert || alerts.alert.length === 0) {
+    if (!geoResponse.data || geoResponse.data.length === 0) {
       return [];
     }
 
-    return alerts.alert.map((alert: any) => ({
-      type: alert.category || 'General',
-      severity: alert.severity || 'Moderate',
-      headline: alert.headline,
-      description: alert.desc,
-      event: alert.event
-    }));
+    const { lat, lon } = geoResponse.data[0];
+
+    // Note: Weather alerts require One Call API 3.0 (paid plan)
+    // For free tier, we'll check for extreme conditions from current weather
+    const weatherResponse = await axios.get(`${OPENWEATHER_BASE_URL}/weather`, {
+      params: {
+        lat,
+        lon,
+        appid: OPENWEATHER_API_KEY,
+        units: 'metric'
+      }
+    });
+
+    const alerts: WeatherAlert[] = [];
+    const { main, weather, wind } = weatherResponse.data;
+
+    // Create alerts based on extreme conditions
+    if (main.temp > 40) {
+      alerts.push({
+        type: 'Heat',
+        severity: 'High',
+        headline: 'Extreme Heat Alert',
+        description: `Temperature is ${Math.round(main.temp)}°C. Take precautions against heat stress for crops and workers.`,
+        event: 'Extreme Temperature'
+      });
+    }
+
+    if (main.temp < 5) {
+      alerts.push({
+        type: 'Cold',
+        severity: 'High',
+        headline: 'Cold Weather Alert',
+        description: `Temperature is ${Math.round(main.temp)}°C. Protect sensitive crops from frost damage.`,
+        event: 'Cold Temperature'
+      });
+    }
+
+    if (wind.speed > 10) { // 10 m/s = 36 km/h
+      alerts.push({
+        type: 'Wind',
+        severity: 'Moderate',
+        headline: 'Strong Wind Alert',
+        description: `Wind speed is ${Math.round(wind.speed * 3.6)} km/h. Avoid spraying operations and provide support to tall crops.`,
+        event: 'Strong Winds'
+      });
+    }
+
+    if (weather[0].main === 'Thunderstorm') {
+      alerts.push({
+        type: 'Storm',
+        severity: 'High',
+        headline: 'Thunderstorm Alert',
+        description: 'Thunderstorm conditions detected. Avoid field operations and ensure safety.',
+        event: 'Thunderstorm'
+      });
+    }
+
+    return alerts;
   } catch (error) {
     console.error('Error fetching weather alerts:', error);
     return [];
   }
 }
 
-export function getCropSpecificAdvice(weather: WeatherData, crop: string): string[] {
+export function getCropSpecificAdvice(weather: WeatherData): string[] {
   const advice: string[] = [];
 
   // Temperature-based advice

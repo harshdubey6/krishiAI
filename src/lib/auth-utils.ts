@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth/next';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { authOptions } from '@/app/api/auth/[...nextauth]/auth';
 
 export async function validateSession() {

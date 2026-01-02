@@ -13,10 +13,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: 'error', message: 'Missing fields' }, { status: 400 });
     }
 
-    const userId = (session as any)?.user?.id;
+    const userId = (session as {user?: {id?: string}})?.user?.id;
     if (!userId) return NextResponse.json({ status: 'error', message: 'Unauthorized' }, { status: 401 });
 
-    const diagnosis = await (prisma as any).diagnosis.findFirst({
+    const diagnosis = await prisma.diagnosis.findFirst({
       where: { id: diagnosisId, userId },
       include: { messages: { orderBy: { createdAt: 'asc' } } },
     });
@@ -26,17 +26,17 @@ export async function POST(req: NextRequest) {
     }
 
     // save user's message
-    const userMsg = await prisma.chatMessage.create({ data: { diagnosisId, role: 'user', content: message } as any });
+    const userMsg = await prisma.chatMessage.create({ data: { diagnosisId, role: 'user', content: message } });
 
     // Build history for AI from previous messages + the new user message
-    const history = (diagnosis.messages || []).map((m: any) => ({ role: m.role, content: m.content }));
+    const history = (diagnosis.messages || []).map((m: {role: string; content: string}) => ({ role: m.role, content: m.content }));
     history.push({ role: 'user', content: message });
 
     // Ask Gemini for a reply
     const reply = await chatWithGemini(history, message);
 
     // save assistant reply
-    const assistantMsg = await prisma.chatMessage.create({ data: { diagnosisId, role: 'assistant', content: reply } as any });
+    const assistantMsg = await prisma.chatMessage.create({ data: { diagnosisId, role: 'assistant', content: reply } });
 
     return NextResponse.json({ status: 'success', data: { reply, userMessage: userMsg, assistantMessage: assistantMsg } }, { status: 200 });
   } catch (error) {

@@ -64,19 +64,19 @@ export async function GET(req: NextRequest) {
         source: 'database'
       });
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Crop guide API error:', error);
     return NextResponse.json({
       status: 'error',
-      message: error.message || 'Failed to fetch crop guide'
+      message: error instanceof Error ? error.message : 'Failed to fetch crop guide'
     }, { status: 500 });
   }
 }
 
 // Generate crop guide using AI (fallback)
 async function generateCropGuide(cropName: string) {
-  // Import Gemini only when needed
-  const { GoogleGenerativeAI } = require('@google/generative-ai');
+  // Import Gemini dynamically
+  const { GoogleGenerativeAI } = await import('@google/generative-ai');
   
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {

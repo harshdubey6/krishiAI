@@ -14,9 +14,34 @@ export default function DiagnosePage() {
   const [image, setImage] = useState<string | null>(null);
   const [cropType, setCropType] = useState('');
   const [symptoms, setSymptoms] = useState('');
-  const [diagnosis, setDiagnosis] = useState<any>(null);
+  const [diagnosis, setDiagnosis] = useState<{id?: string; messages?: Array<{id?: string; role: string; content: string}>; [key: string]: unknown} | null>(null);
   const [chatInput, setChatInput] = useState('');
   const [isSending, setIsSending] = useState(false);
+
+  // Hooks must be called before any conditional returns
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (file && file.type.startsWith('image/')) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('Image size should be less than 10MB / छवि का आकार 10MB से कम होना चाहिए');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      toast.error('Please upload a valid image / कृपया एक मान्य छवि अपलोड करें');
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { 'image/*': [] },
+    maxSize: 10 * 1024 * 1024,
+    multiple: false,
+  });
 
   // Check authentication
   useEffect(() => {
@@ -51,30 +76,6 @@ export default function DiagnosePage() {
     return null;
   }
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (file && file.type.startsWith('image/')) {
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error('Image size should be less than 10MB / छवि का आकार 10MB से कम होना चाहिए');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      toast.error('Please upload a valid image / कृपया एक मान्य छवि अपलोड करें');
-    }
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { 'image/*': [] },
-    maxSize: 10 * 1024 * 1024,
-    multiple: false,
-  });
-
   const handleDiagnose = async () => {
     if (!image) {
       toast.error('Please upload an image / कृपया एक छवि अपलोड करें');
@@ -107,10 +108,10 @@ export default function DiagnosePage() {
       });
 
       const text = await response.text();
-      let data: any;
+      let data: {status?: string; message?: string; error?: string; data?: {messages?: Array<{role: string; content: string}>; [key: string]: unknown}};
       try {
         data = JSON.parse(text);
-      } catch (e) {
+      } catch {
         throw new Error(`Server returned invalid JSON: ${text.substring(0, 200)}`);
       }
 
@@ -119,7 +120,7 @@ export default function DiagnosePage() {
       }
 
       toast.success('Analysis complete! / विश्लेषण पूर्ण!', { id: 'analyze' });
-      setDiagnosis(data.data);
+      setDiagnosis(data.data || null);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : 'Failed to analyze crop / फसल का विश्लेषण विफल रहा',
@@ -141,10 +142,10 @@ export default function DiagnosePage() {
         body: JSON.stringify({ diagnosisId: diagnosis.id, message: chatInput.trim() }),
       });
       const text = await res.text();
-      let data: any;
+      let data: {status?: string; message?: string; data?: {reply?: string; userMessage?: {id: string; role: string; content: string; createdAt: string}; assistantMessage?: {id: string; role: string; content: string; createdAt: string}}};
       try {
         data = JSON.parse(text);
-      } catch (e) {
+      } catch {
         throw new Error(`Server returned invalid JSON: ${text.substring(0, 200)}`);
       }
       if (!res.ok) throw new Error(data?.message || 'Failed to send');
@@ -152,12 +153,12 @@ export default function DiagnosePage() {
       const userMsg = data?.data?.userMessage;
       const assistantMsg = data?.data?.assistantMessage;
 
-      setDiagnosis((prev: any) =>
+      setDiagnosis((prev) =>
         prev
           ? {
               ...prev,
               messages: [
-                ...prev.messages,
+                ...(prev.messages || []),
                 userMsg
                   ? { id: userMsg.id, role: userMsg.role, content: userMsg.content, createdAt: userMsg.createdAt }
                   : { id: `temp-u-${Date.now()}`, role: 'user', content: chatInput, createdAt: new Date().toISOString() },
@@ -169,15 +170,15 @@ export default function DiagnosePage() {
           : prev
       );
       setChatInput('');
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Failed to send / भेजने में विफल');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to send / भेजने में विफल');
     } finally {
       setIsSending(false);
     }
   };
 
-  const getSeverityColor = (severity?: string) => {
-    if (!severity) return 'bg-gray-100 text-gray-800';
+  const getSeverityColor = (severity?: unknown) => {
+    if (!severity || typeof severity !== 'string') return 'bg-gray-100 text-gray-800';
     switch (severity.toLowerCase()) {
       case 'mild':
         return 'bg-green-100 text-green-800';
@@ -190,8 +191,8 @@ export default function DiagnosePage() {
     }
   };
 
-  const getSeverityIcon = (severity?: string) => {
-    if (!severity) return <Activity className="w-4 h-4" />;
+  const getSeverityIcon = (severity?: unknown) => {
+    if (!severity || typeof severity !== 'string') return <Activity className="w-4 h-4" />;
     switch (severity.toLowerCase()) {
       case 'mild':
         return <CheckCircle className="w-4 h-4" />;
@@ -386,7 +387,7 @@ export default function DiagnosePage() {
                 </div>
                 <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold ${getSeverityColor(diagnosis.severity)}`}>
                   {getSeverityIcon(diagnosis.severity)}
-                  <span className="capitalize">{diagnosis.severity || 'Unknown'}</span>
+                  <span className="capitalize">{typeof diagnosis.severity === 'string' ? diagnosis.severity : 'Unknown'}</span>
                 </div>
               </div>
             </div>
@@ -399,13 +400,13 @@ export default function DiagnosePage() {
                   <span className="text-sm font-medium text-gray-600">Confidence / विश्वास</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="text-2xl font-bold text-gray-900">{diagnosis.confidence || 0}%</div>
+                  <div className="text-2xl font-bold text-gray-900">{typeof diagnosis.confidence === 'number' ? diagnosis.confidence : 0}%</div>
                 </div>
               </div>
               <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
                 <div
                   className="bg-blue-600 h-2 rounded-full transition-all"
-                  style={{ width: `${diagnosis.confidence || 0}%` }}
+                  style={{ width: `${typeof diagnosis.confidence === 'number' ? diagnosis.confidence : 0}%` }}
                 ></div>
               </div>
             </div>
@@ -418,7 +419,7 @@ export default function DiagnosePage() {
                   <span className="text-sm font-medium text-gray-600">Est. Cost / अनुमानित लागत</span>
                 </div>
                 <div className="text-2xl font-bold text-gray-900">
-                  ₹{diagnosis.estimatedCost ? diagnosis.estimatedCost.toLocaleString('en-IN') : 'N/A'}
+                  ₹{typeof diagnosis.estimatedCost === 'number' ? diagnosis.estimatedCost.toLocaleString('en-IN') : 'N/A'}
                 </div>
               </div>
               <p className="text-xs text-gray-500 mt-1">Treatment cost estimate</p>
@@ -437,46 +438,46 @@ export default function DiagnosePage() {
               <div className="space-y-4 text-base text-gray-800 leading-relaxed">
                 <div className="bg-green-50 p-4 rounded-lg">
                   <p className="font-semibold text-green-800 mb-2">Diagnosis:</p>
-                  <p className="whitespace-pre-wrap">{diagnosis.diagnosis}</p>
+                  <p className="whitespace-pre-wrap">{String(diagnosis.diagnosis || '')}</p>
                 </div>
 
-                {diagnosis.causes && diagnosis.causes.length > 0 && (
+                {Array.isArray(diagnosis.causes) && diagnosis.causes.length > 0 && (
                   <div>
                     <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-2 flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4" />
                       Causes / कारण
                     </h4>
                     <ul className="space-y-2 list-disc pl-5">
-                      {diagnosis.causes.map((c: string, idx: number) => (
-                        <li key={idx} className="text-gray-700">{c}</li>
+                      {diagnosis.causes.map((c, idx) => (
+                        <li key={idx} className="text-gray-700">{String(c)}</li>
                       ))}
                     </ul>
                   </div>
                 )}
 
-                {diagnosis.treatment && diagnosis.treatment.length > 0 && (
+                {Array.isArray(diagnosis.treatment) && diagnosis.treatment.length > 0 && (
                   <div>
                     <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-2 flex items-center gap-2">
                       <CheckCircle className="w-4 h-4" />
                       Treatment / उपचार
                     </h4>
                     <ul className="space-y-2 list-disc pl-5">
-                      {diagnosis.treatment.map((t: string, idx: number) => (
-                        <li key={idx} className="text-gray-700">{t}</li>
+                      {(diagnosis.treatment as unknown[]).map((t, i) => (
+                        <li key={i} className="text-gray-700">{String(t)}</li>
                       ))}
                     </ul>
                   </div>
                 )}
 
-                {diagnosis.prevention && diagnosis.prevention.length > 0 && (
+                {Array.isArray(diagnosis.prevention) && (diagnosis.prevention as unknown[]).length > 0 && (
                   <div>
                     <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-2 flex items-center gap-2">
                       <Sprout className="w-4 h-4" />
                       Prevention / रोकथाम
                     </h4>
                     <ul className="space-y-2 list-disc pl-5">
-                      {diagnosis.prevention.map((p: string, idx: number) => (
-                        <li key={idx} className="text-gray-700">{p}</li>
+                      {(diagnosis.prevention as unknown[]).map((p, i) => (
+                        <li key={i} className="text-gray-700">{String(p)}</li>
                       ))}
                     </ul>
                   </div>
@@ -494,14 +495,14 @@ export default function DiagnosePage() {
               </div>
               <div className="flex-1 h-80 overflow-y-auto space-y-4 pr-2 mb-4" id="chat-messages">
                 {diagnosis.messages && diagnosis.messages.length > 0 ? (
-                  diagnosis.messages.map((m: any) => (
-                    <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  diagnosis.messages.map((m, idx) => (
+                    <div key={m.id || idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div
                         className={`${
                           m.role === 'user' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-900'
                         } 
                         px-4 py-3 rounded-2xl max-w-[85%] whitespace-pre-wrap leading-relaxed break-words shadow-sm
-                        ${m.id.startsWith('temp') ? 'animate-pulse' : ''}`}
+                        ${m.id?.startsWith('temp') ? 'animate-pulse' : ''}`}
                       >
                         {m.content}
                       </div>

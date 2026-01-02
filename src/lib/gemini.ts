@@ -72,7 +72,7 @@ export async function analyzePlantImage(imageBase64: string, plantType: string, 
       };
 
       return structured;
-    } catch (err) {
+    } catch {
       console.error('Failed to parse Gemini analyze response as JSON. Raw response:', text);
       // If we can't parse as JSON, create a structured response from the text
       return {
@@ -91,7 +91,7 @@ export async function analyzePlantImage(imageBase64: string, plantType: string, 
   }
 }
 
-export async function chatWithGemini(history: any[], newMessage: string) {
+export async function chatWithGemini(history: Array<{role: string; content: string}>, newMessage: string) {
   try {
     if (!process.env.GEMINI_API_KEY) {
       throw new Error('GEMINI_API_KEY environment variable is not set');
@@ -102,7 +102,7 @@ export async function chatWithGemini(history: any[], newMessage: string) {
     const chat = model.startChat({
       history: history.map(msg => ({
         role: msg.role,
-        parts: msg.content,
+        parts: [{ text: msg.content }],
       })),
     });
 

@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Get crop-specific advice if crop parameter provided
-    const cropAdvice = crop ? getCropSpecificAdvice(currentWeather, crop) : [];
+    const cropAdvice = crop ? getCropSpecificAdvice(currentWeather) : [];
     const irrigationAdvice = getIrrigationRecommendation(currentWeather, forecast);
     const sprayingAdvice = getSprayingRecommendation(currentWeather, forecast);
 
@@ -49,11 +49,11 @@ export async function GET(req: NextRequest) {
         }
       }
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Weather API error:', error);
     return NextResponse.json({
       status: 'error',
-      message: error.message || 'Failed to fetch weather data'
+      message: error instanceof Error ? error.message : 'Failed to fetch weather data'
     }, { status: 500 });
   }
 }

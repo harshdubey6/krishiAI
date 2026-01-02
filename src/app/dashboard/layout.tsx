@@ -57,7 +57,7 @@ export default function DashboardLayout({
             </div>
             <div>
               <h1 className="text-base sm:text-lg font-bold text-green-600">KrishiAI</h1>
-              <p className="text-[10px] sm:text-xs text-gray-500">Farmer's Platform</p>
+              <p className="text-[10px] sm:text-xs text-gray-500">Farmer&apos;s Platform</p>
             </div>
           </div>
           <button

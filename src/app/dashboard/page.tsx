@@ -5,30 +5,45 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Sprout, CloudSun, TrendingUp, BookOpen, AlertCircle, ArrowRight, Sparkles, Target, Shield, Clock } from 'lucide-react';
 
+// Define proper type for diagnosis history items
+interface DiagnosisItem {
+  id: string;
+  cropType?: string;
+  plantType?: string;
+  severity?: string;
+  confidence?: number;
+  diagnosis?: string;
+  createdAt: string;
+  estimatedCost?: number;
+}
+
 export default function DashboardPage() {
   const { session, isAuthenticated } = useAuth();
-  const [recent, setRecent] = useState<any[]>([]);
+  const [recent, setRecent] = useState<DiagnosisItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
   useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
     const load = async () => {
       setLoading(true);
       try {
         const res = await fetch('/api/diagnose/history');
         const data = await res.json();
         if (res.ok) setRecent(data.items.slice(0, 3));
-      } catch (e) {
+      } catch {
         // ignore
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, []);
+  }, [isAuthenticated]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const features = [
     {
@@ -209,7 +224,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {recent.map((d, idx) => (
+              {recent.map((d) => (
                 <div 
                   key={d.id} 
                   className="group p-4 sm:p-6 bg-gradient-to-br from-gray-50 to-green-50/30 rounded-2xl hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-green-200"

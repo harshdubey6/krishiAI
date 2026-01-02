@@ -80,11 +80,11 @@ export async function GET(req: NextRequest) {
           message: 'Invalid action parameter'
         }, { status: 400 });
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Market prices API error:', error);
     return NextResponse.json({
       status: 'error',
-      message: error.message || 'Failed to fetch market data'
+      message: error instanceof Error ? error.message : 'Failed to fetch market data'
     }, { status: 500 });
   }
 }

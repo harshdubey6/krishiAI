@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
@@ -25,7 +24,7 @@ export default function Sidebar({ onNavigate }: SidebarProps = {}) {
     try {
       await signOut({ redirect: true, callbackUrl: '/login' });
       toast.success('Logged out successfully');
-    } catch (error) {
+    } catch {
       toast.error('Failed to logout');
     }
   };
@@ -89,7 +88,7 @@ export default function Sidebar({ onNavigate }: SidebarProps = {}) {
           </svg>
         </div>
         <h1 className="text-xl sm:text-2xl font-bold text-green-600">KrishiAI</h1>
-        <p className="text-xs sm:text-sm text-gray-500 mt-1">Farmer's Platform</p>
+        <p className="text-xs sm:text-sm text-gray-500 mt-1">Farmer&apos;s Platform</p>
       </div>
 
       {/* Navigation */}

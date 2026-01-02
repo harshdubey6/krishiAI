@@ -100,7 +100,7 @@ export default function RegisterForm() {
         const data = await response.json();
         toast.error(data.error || 'Registration failed');
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred during registration');
     } finally {
       setIsLoading(false);

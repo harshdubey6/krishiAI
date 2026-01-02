@@ -57,14 +57,14 @@ async function fetchAGMARKNETData(params: {
     const data = await response.json();
     
     // Transform API response to CropPrice format
-    return data.records?.map((record: any) => ({
+    return data.records?.map((record: {commodity?: string; Commodity?: string; state?: string; State?: string; district?: string; District?: string; market?: string; Market?: string; min_price?: string; Min_Price?: string; max_price?: string; Max_Price?: string; modal_price?: string; Modal_Price?: string; unit?: string; arrival_date?: string; Arrival_Date?: string}) => ({
       cropName: record.commodity || record.Commodity || 'Unknown',
       state: record.state || record.State || 'Unknown',
       district: record.district || record.District || 'Unknown',
       market: record.market || record.Market || 'Unknown',
-      minPrice: parseFloat(record.min_price || record.Min_Price || 0),
-      maxPrice: parseFloat(record.max_price || record.Max_Price || 0),
-      modalPrice: parseFloat(record.modal_price || record.Modal_Price || 0),
+      minPrice: parseFloat(String(record.min_price || record.Min_Price || '0')),
+      maxPrice: parseFloat(String(record.max_price || record.Max_Price || '0')),
+      modalPrice: parseFloat(String(record.modal_price || record.Modal_Price || '0')),
       unit: record.unit || 'Quintal',
       date: record.arrival_date || record.Arrival_Date || new Date().toISOString().split('T')[0]
     })) || getFallbackMockData();

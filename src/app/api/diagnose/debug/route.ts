@@ -4,7 +4,6 @@ import { analyzePlantImage } from '@/lib/gemini';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const maxBodySize = '10mb';
 
 export async function POST(req: NextRequest) {
   // Require auth so only dev/testers call this in your environment

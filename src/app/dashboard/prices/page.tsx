@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { TrendingUp, TrendingDown, Minus, Calculator, IndianRupee, BarChart3 } from 'lucide-react';
@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 export default function MarketPricesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [prices, setPrices] = useState<any[]>([]);
+  const [prices, setPrices] = useState<Array<{commodity: string; [key: string]: unknown}>>([]);
   const [loading, setLoading] = useState(true);
   const [searchCrop, setSearchCrop] = useState('');
   const [searchState, setSearchState] = useState('');
@@ -19,33 +19,9 @@ export default function MarketPricesPage() {
   const [calcCrop, setCalcCrop] = useState('');
   const [calcQuantity, setCalcQuantity] = useState('');
   const [calcCost, setCalcCost] = useState('');
-  const [calcResult, setCalcResult] = useState<any>(null);
+  const [calcResult, setCalcResult] = useState<{revenue: number; [key: string]: unknown} | null>(null);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      toast.error('Please sign in to access market prices');
-      router.replace('/login');
-    }
-  }, [status, router]);
-
-  useEffect(() => {
-    if (status === 'authenticated') {
-      fetchPrices();
-    }
-  }, [status]);
-
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mb-4"></div>
-        <p className="text-gray-600">Loading...</p>
-      </div>
-    );
-  }
-
-  if (!session) return null;
-
-  const fetchPrices = async () => {
+  const fetchPrices = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -68,7 +44,31 @@ export default function MarketPricesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchCrop, searchState]);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      toast.error('Please sign in to access market prices');
+      router.replace('/login');
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetchPrices();
+    }
+  }, [status, fetchPrices]);
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mb-4"></div>
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!session) return null;
 
   const calculateProfit = async () => {
     if (!calcCrop || !calcQuantity || !calcCost) {
@@ -99,7 +99,7 @@ export default function MarketPricesPage() {
     }
   };
 
-  const getPriceIndicator = (price: any) => {
+  const getPriceIndicator = (price: {minPrice: number; maxPrice: number; modalPrice: number}) => {
     const avgPrice = (price.minPrice + price.maxPrice) / 2;
     const diff = price.modalPrice - avgPrice;
     const percentage = (diff / avgPrice) * 100;
@@ -224,18 +224,18 @@ export default function MarketPricesPage() {
               <div className="mt-6 grid md:grid-cols-3 gap-4">
                 <div className="bg-white/20 backdrop-blur rounded-xl p-4">
                   <div className="text-sm text-blue-100 mb-1">Estimated Revenue</div>
-                  <div className="text-2xl font-bold">₹{calcResult.estimatedRevenue.toLocaleString('en-IN')}</div>
+                  <div className="text-2xl font-bold">₹{(calcResult as any)?.estimatedRevenue?.toLocaleString?.('en-IN') || 0}</div>
                 </div>
                 <div className="bg-white/20 backdrop-blur rounded-xl p-4">
                   <div className="text-sm text-blue-100 mb-1">Estimated Profit</div>
-                  <div className={`text-2xl font-bold ${calcResult.profit >= 0 ? 'text-green-300' : 'text-red-300'}`}>
-                    ₹{calcResult.profit.toLocaleString('en-IN')}
+                  <div className={`text-2xl font-bold ${(calcResult as any)?.profit >= 0 ? 'text-green-300' : 'text-red-300'}`}>
+                    ₹{(calcResult as any)?.profit?.toLocaleString?.('en-IN') || 0}
                   </div>
                 </div>
                 <div className="bg-white/20 backdrop-blur rounded-xl p-4">
                   <div className="text-sm text-blue-100 mb-1">Profit Margin</div>
-                  <div className={`text-2xl font-bold ${calcResult.profitMargin >= 0 ? 'text-green-300' : 'text-red-300'}`}>
-                    {calcResult.profitMargin}%
+                  <div className={`text-2xl font-bold ${(calcResult as any)?.profitMargin >= 0 ? 'text-green-300' : 'text-red-300'}`}>
+                    {(calcResult as any)?.profitMargin || 0}%
                   </div>
                 </div>
               </div>
@@ -250,15 +250,15 @@ export default function MarketPricesPage() {
           </div>
         ) : prices.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {prices.map((price, index) => {
+            {prices.map((price: any, index: number) => {
               const indicator = getPriceIndicator(price);
               return (
                 <div key={index} className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900">{price.cropName}</h3>
-                      <p className="text-sm text-gray-600">{price.market}</p>
-                      <p className="text-xs text-gray-500">{price.district}, {price.state}</p>
+                      <h3 className="text-xl font-bold text-gray-900">{String(price?.cropName || '')}</h3>
+                      <p className="text-sm text-gray-600">{String(price?.market || '')}</p>
+                      <p className="text-xs text-gray-500">{String(price?.district || '')}, {String(price?.state || '')}</p>
                     </div>
                     {indicator.icon}
                   </div>
@@ -267,19 +267,19 @@ export default function MarketPricesPage() {
                     <div className="text-sm text-gray-600 mb-1">Modal Price</div>
                     <div className="text-3xl font-bold text-orange-600 flex items-center gap-2">
                       <IndianRupee className="w-7 h-7" />
-                      {price.modalPrice}
+                      {Number(price?.modalPrice || 0)}
                     </div>
-                    <div className="text-sm text-gray-600">per {price.unit}</div>
+                    <div className="text-sm text-gray-600">per {String(price?.unit || '')}</div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <div className="text-xs text-gray-600 mb-1">Min Price</div>
-                      <div className="text-lg font-semibold text-gray-900">₹{price.minPrice}</div>
+                      <div className="text-lg font-semibold text-gray-900">₹{Number(price?.minPrice || 0)}</div>
                     </div>
                     <div>
                       <div className="text-xs text-gray-600 mb-1">Max Price</div>
-                      <div className="text-lg font-semibold text-gray-900">₹{price.maxPrice}</div>
+                      <div className="text-lg font-semibold text-gray-900">₹{Number(price?.maxPrice || 0)}</div>
                     </div>
                   </div>
 

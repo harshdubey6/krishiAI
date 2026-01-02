@@ -6,11 +6,28 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { BookOpen, Search, Sprout, CloudSun, Droplets, Leaf, Bug, AlertTriangle, Scissors, TrendingUp, PlayCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
+// Define proper types for crop guide data
+interface CropGuide {
+  id: string;
+  cropName: string;
+  overview?: string;
+  climate?: string;
+  soilType?: string;
+  sowing?: string;
+  irrigation?: string;
+  fertilizer?: string;
+  pests?: string;
+  diseases?: string;
+  harvesting?: string;
+  yield?: string;
+  videoUrls?: string[];
+}
+
 export default function FarmerGuidePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [guides, setGuides] = useState<any[]>([]);
-  const [selectedCrop, setSelectedCrop] = useState<any>(null);
+  const [guides, setGuides] = useState<CropGuide[]>([]);
+  const [selectedCrop, setSelectedCrop] = useState<CropGuide | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -170,7 +187,7 @@ export default function FarmerGuidePage() {
                     }`}
                   >
                     <div className="font-medium">{guide.cropName}</div>
-                    {guide.yield && (
+                    {'yield' in guide && typeof guide.yield === 'string' && (
                       <div className="text-xs text-gray-500 mt-1">
                         Yield: {guide.yield}
                       </div>
@@ -205,11 +222,11 @@ export default function FarmerGuidePage() {
             <div className="space-y-4">
               {/* Crop Header */}
               <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl shadow-lg p-6 text-white">
-                <h2 className="text-3xl font-bold mb-2">{selectedCrop.cropName}</h2>
-                {selectedCrop.yield && (
+                <h2 className="text-3xl font-bold mb-2">{String(selectedCrop.cropName || '')}</h2>
+                {'yield' in selectedCrop && typeof selectedCrop.yield === 'string' && (
                   <div className="flex items-center gap-2 text-green-100">
                     <TrendingUp className="w-5 h-5" />
-                    <span className="font-medium">Expected Yield: {selectedCrop.yield}</span>
+                    <span className="font-medium">Expected Yield: {String(selectedCrop.yield)}</span>
                   </div>
                 )}
               </div>
@@ -217,104 +234,248 @@ export default function FarmerGuidePage() {
               {/* Guide Sections */}
               <div className="space-y-3">
                 {/* Overview */}
-                <GuideSection
-                  icon={<BookOpen className="w-5 h-5" />}
-                  title="Overview / अवलोकन"
-                  content={selectedCrop.overview}
-                  isExpanded={expandedSections.overview}
-                  onToggle={() => toggleSection('overview')}
-                />
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <button
+                    onClick={() => toggleSection('overview')}
+                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="text-green-600"><BookOpen className="w-5 h-5" /></div>
+                      <h3 className="text-lg font-semibold text-gray-800">Overview / अवलोकन</h3>
+                    </div>
+                    {expandedSections.overview ? (
+                      <ChevronUp className="w-5 h-5 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-500" />
+                    )}
+                  </button>
+                  {expandedSections.overview && (
+                    <div className="px-4 pb-4">
+                      <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                        {String(selectedCrop.overview || '')}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Climate */}
                 {selectedCrop.climate && (
-                  <GuideSection
-                    icon={<CloudSun className="w-5 h-5" />}
-                    title="Climate / जलवायु"
-                    content={selectedCrop.climate}
-                    isExpanded={expandedSections.climate}
-                    onToggle={() => toggleSection('climate')}
-                  />
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <button
+                      onClick={() => toggleSection('climate')}
+                      className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-green-600"><CloudSun className="w-5 h-5" /></div>
+                        <h3 className="text-lg font-semibold text-gray-800">Climate / जलवायु</h3>
+                      </div>
+                      {expandedSections.climate ? (
+                        <ChevronUp className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
+                    {expandedSections.climate && (
+                      <div className="px-4 pb-4">
+                        <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                          {String(selectedCrop.climate || '')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {/* Soil Type */}
                 {selectedCrop.soilType && (
-                  <GuideSection
-                    icon={<Leaf className="w-5 h-5" />}
-                    title="Soil Type / मिट्टी का प्रकार"
-                    content={selectedCrop.soilType}
-                    isExpanded={expandedSections.soilType}
-                    onToggle={() => toggleSection('soilType')}
-                  />
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <button
+                      onClick={() => toggleSection('soilType')}
+                      className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-green-600"><Leaf className="w-5 h-5" /></div>
+                        <h3 className="text-lg font-semibold text-gray-800">Soil Type / मिट्टी का प्रकार</h3>
+                      </div>
+                      {expandedSections.soilType ? (
+                        <ChevronUp className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
+                    {expandedSections.soilType && (
+                      <div className="px-4 pb-4">
+                        <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                          {String(selectedCrop.soilType || '')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {/* Sowing */}
                 {selectedCrop.sowing && (
-                  <GuideSection
-                    icon={<Sprout className="w-5 h-5" />}
-                    title="Sowing / बुवाई"
-                    content={selectedCrop.sowing}
-                    isExpanded={expandedSections.sowing}
-                    onToggle={() => toggleSection('sowing')}
-                  />
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <button
+                      onClick={() => toggleSection('sowing')}
+                      className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-green-600"><Sprout className="w-5 h-5" /></div>
+                        <h3 className="text-lg font-semibold text-gray-800">Sowing / बुवाई</h3>
+                      </div>
+                      {expandedSections.sowing ? (
+                        <ChevronUp className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
+                    {expandedSections.sowing && (
+                      <div className="px-4 pb-4">
+                        <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                          {String(selectedCrop.sowing || '')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {/* Irrigation */}
                 {selectedCrop.irrigation && (
-                  <GuideSection
-                    icon={<Droplets className="w-5 h-5" />}
-                    title="Irrigation / सिंचाई"
-                    content={selectedCrop.irrigation}
-                    isExpanded={expandedSections.irrigation}
-                    onToggle={() => toggleSection('irrigation')}
-                  />
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <button
+                      onClick={() => toggleSection('irrigation')}
+                      className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-green-600"><Droplets className="w-5 h-5" /></div>
+                        <h3 className="text-lg font-semibold text-gray-800">Irrigation / सिंचाई</h3>
+                      </div>
+                      {expandedSections.irrigation ? (
+                        <ChevronUp className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
+                    {expandedSections.irrigation && (
+                      <div className="px-4 pb-4">
+                        <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                          {String(selectedCrop.irrigation || '')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {/* Fertilizer */}
                 {selectedCrop.fertilizer && (
-                  <GuideSection
-                    icon={<Leaf className="w-5 h-5" />}
-                    title="Fertilizer / उर्वरक"
-                    content={selectedCrop.fertilizer}
-                    isExpanded={expandedSections.fertilizer}
-                    onToggle={() => toggleSection('fertilizer')}
-                  />
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <button
+                      onClick={() => toggleSection('fertilizer')}
+                      className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-green-600"><Leaf className="w-5 h-5" /></div>
+                        <h3 className="text-lg font-semibold text-gray-800">Fertilizer / उर्वरक</h3>
+                      </div>
+                      {expandedSections.fertilizer ? (
+                        <ChevronUp className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
+                    {expandedSections.fertilizer && (
+                      <div className="px-4 pb-4">
+                        <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                          {String(selectedCrop.fertilizer || '')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {/* Pests */}
                 {selectedCrop.pests && (
-                  <GuideSection
-                    icon={<Bug className="w-5 h-5" />}
-                    title="Pest Management / कीट प्रबंधन"
-                    content={selectedCrop.pests}
-                    isExpanded={expandedSections.pests}
-                    onToggle={() => toggleSection('pests')}
-                  />
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <button
+                      onClick={() => toggleSection('pests')}
+                      className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-green-600"><Bug className="w-5 h-5" /></div>
+                        <h3 className="text-lg font-semibold text-gray-800">Pest Management / कीट प्रबंधन</h3>
+                      </div>
+                      {expandedSections.pests ? (
+                        <ChevronUp className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
+                    {expandedSections.pests && (
+                      <div className="px-4 pb-4">
+                        <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                          {String(selectedCrop.pests || '')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {/* Diseases */}
                 {selectedCrop.diseases && (
-                  <GuideSection
-                    icon={<AlertTriangle className="w-5 h-5" />}
-                    title="Disease Management / रोग प्रबंधन"
-                    content={selectedCrop.diseases}
-                    isExpanded={expandedSections.diseases}
-                    onToggle={() => toggleSection('diseases')}
-                  />
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <button
+                      onClick={() => toggleSection('diseases')}
+                      className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-green-600"><AlertTriangle className="w-5 h-5" /></div>
+                        <h3 className="text-lg font-semibold text-gray-800">Disease Management / रोग प्रबंधन</h3>
+                      </div>
+                      {expandedSections.diseases ? (
+                        <ChevronUp className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
+                    {expandedSections.diseases && (
+                      <div className="px-4 pb-4">
+                        <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                          {String(selectedCrop.diseases || '')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {/* Harvesting */}
                 {selectedCrop.harvesting && (
-                  <GuideSection
-                    icon={<Scissors className="w-5 h-5" />}
-                    title="Harvesting / कटाई"
-                    content={selectedCrop.harvesting}
-                    isExpanded={expandedSections.harvesting}
-                    onToggle={() => toggleSection('harvesting')}
-                  />
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <button
+                      onClick={() => toggleSection('harvesting')}
+                      className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-green-600"><Scissors className="w-5 h-5" /></div>
+                        <h3 className="text-lg font-semibold text-gray-800">Harvesting / कटाई</h3>
+                      </div>
+                      {expandedSections.harvesting ? (
+                        <ChevronUp className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
+                    {expandedSections.harvesting && (
+                      <div className="px-4 pb-4">
+                        <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                          {String(selectedCrop.harvesting || '')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {/* Video Resources */}
-                {selectedCrop.videoUrls && selectedCrop.videoUrls.length > 0 && (
+                {selectedCrop?.videoUrls && selectedCrop.videoUrls.length > 0 && (
                   <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <div className="flex items-center gap-2 mb-4">
                       <PlayCircle className="w-5 h-5 text-green-600" />
@@ -347,43 +508,3 @@ export default function FarmerGuidePage() {
   );
 }
 
-// Guide Section Component
-function GuideSection({ 
-  icon, 
-  title, 
-  content, 
-  isExpanded, 
-  onToggle 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  content: string; 
-  isExpanded: boolean; 
-  onToggle: () => void;
-}) {
-  return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <div className="text-green-600">{icon}</div>
-          <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-        </div>
-        {isExpanded ? (
-          <ChevronUp className="w-5 h-5 text-gray-500" />
-        ) : (
-          <ChevronDown className="w-5 h-5 text-gray-500" />
-        )}
-      </button>
-      {isExpanded && (
-        <div className="px-4 pb-4">
-          <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-            {content}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}

@@ -6,7 +6,6 @@ import { analyzePlantImage } from '@/lib/gemini';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
-export const maxBodySize = '10mb';
 
 export async function POST(req: NextRequest) {
   // Validate session
@@ -33,7 +32,7 @@ export async function POST(req: NextRequest) {
     const aiResult = await analyzePlantImage(image, cropType, symptoms);
 
     // Ensure we have an authenticated user id
-    const userId = (session as any)?.user?.id;
+    const userId = (session as {user?: {id?: string}})?.user?.id;
     if (!userId) {
       return NextResponse.json({ status: 'error', message: 'User not authenticated' }, { status: 401 });
     }
@@ -87,7 +86,7 @@ export async function POST(req: NextRequest) {
     try {
       // Create the diagnosis
       savedDiagnosis = await prisma.diagnosis.create({
-        data: diagnosisInput as any,
+        data: diagnosisInput,
       });
     } catch (dbError) {
       return NextResponse.json({ 

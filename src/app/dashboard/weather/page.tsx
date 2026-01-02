@@ -119,7 +119,7 @@ export default function WeatherPage() {
             <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl p-8 text-white">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold mb-1">{weatherData.current.location}</h2>
+                  <h2 className="text-2xl font-bold mb-1">{String(weatherData?.current?.location || '')}</h2>
                   <p className="text-blue-100">Current Weather</p>
                 </div>
                 <CloudSun className="w-16 h-16" />
@@ -131,8 +131,8 @@ export default function WeatherPage() {
                     <Thermometer className="w-5 h-5" />
                     <span className="text-sm text-blue-100">Temperature</span>
                   </div>
-                  <div className="text-3xl font-bold">{weatherData.current.temperature}°C</div>
-                  <div className="text-sm text-blue-100">Feels like {weatherData.current.feelsLike}°C</div>
+                  <div className="text-3xl font-bold">{Number(weatherData?.current?.temperature || 0)}°C</div>
+                  <div className="text-sm text-blue-100">Feels like {Number(weatherData?.current?.feelsLike || 0)}°C</div>
                 </div>
                 
                 <div>
@@ -140,7 +140,7 @@ export default function WeatherPage() {
                     <Droplets className="w-5 h-5" />
                     <span className="text-sm text-blue-100">Humidity</span>
                   </div>
-                  <div className="text-3xl font-bold">{weatherData.current.humidity}%</div>
+                  <div className="text-3xl font-bold">{Number(weatherData?.current?.humidity || 0)}%</div>
                 </div>
                 
                 <div>
@@ -148,7 +148,7 @@ export default function WeatherPage() {
                     <Wind className="w-5 h-5" />
                     <span className="text-sm text-blue-100">Wind Speed</span>
                   </div>
-                  <div className="text-3xl font-bold">{weatherData.current.windSpeed}</div>
+                  <div className="text-3xl font-bold">{Number(weatherData?.current?.windSpeed || 0)}</div>
                   <div className="text-sm text-blue-100">km/h</div>
                 </div>
                 
@@ -157,20 +157,20 @@ export default function WeatherPage() {
                     <CloudSun className="w-5 h-5" />
                     <span className="text-sm text-blue-100">Condition</span>
                   </div>
-                  <div className="text-lg font-semibold">{weatherData.current.condition}</div>
+                  <div className="text-lg font-semibold">{String(weatherData?.current?.condition || '')}</div>
                 </div>
               </div>
             </div>
 
             {/* Alerts */}
-            {weatherData.alerts && weatherData.alerts.length > 0 && (
+            {weatherData?.alerts && (weatherData.alerts as any[]).length > 0 && (
               <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <AlertTriangle className="w-6 h-6 text-red-600" />
                   <h3 className="text-xl font-bold text-red-900">Weather Alerts / मौसम चेतावनी</h3>
                 </div>
                 <div className="space-y-3">
-                  {weatherData.alerts.map((alert: any, index: number) => (
+                  {(weatherData.alerts as Array<{headline: string; description: string}>).map((alert, index) => (
                     <div key={index} className="bg-white rounded-lg p-4">
                       <div className="font-semibold text-red-900 mb-1">{alert.headline}</div>
                       <div className="text-sm text-gray-700">{alert.description}</div>
@@ -194,7 +194,7 @@ export default function WeatherPage() {
                     <Droplets className="w-5 h-5" />
                     Irrigation / सिंचाई
                   </h4>
-                  <p className="text-gray-700">{weatherData.advice.irrigation}</p>
+                  <p className="text-gray-700">{String(weatherData?.advice?.irrigation || '')}</p>
                 </div>
 
                 {/* Spraying */}
@@ -203,16 +203,16 @@ export default function WeatherPage() {
                     <Sprout className="w-5 h-5" />
                     Spraying / छिड़काव
                   </h4>
-                  <p className="text-gray-700">{weatherData.advice.spraying}</p>
+                  <p className="text-gray-700">{String(weatherData?.advice?.spraying || '')}</p>
                 </div>
               </div>
 
               {/* Crop Specific Advice */}
-              {weatherData.advice.cropSpecific && weatherData.advice.cropSpecific.length > 0 && (
+              {weatherData?.advice?.cropSpecific && (weatherData.advice.cropSpecific as any[]).length > 0 && (
                 <div className="mt-6 bg-yellow-50 rounded-xl p-5">
                   <h4 className="font-semibold text-yellow-900 mb-3">Crop-Specific Advice</h4>
                   <ul className="space-y-2">
-                    {weatherData.advice.cropSpecific.map((tip: string, index: number) => (
+                    {(weatherData.advice.cropSpecific as string[]).map((tip: string, index: number) => (
                       <li key={index} className="flex items-start gap-2 text-gray-700">
                         <span className="text-yellow-600 mt-1">•</span>
                         <span>{tip}</span>
@@ -231,7 +231,7 @@ export default function WeatherPage() {
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                {weatherData.forecast.map((day: any, index: number) => (
+                {(weatherData?.forecast as Array<{date: string; maxTemp: number; minTemp: number; condition: string; chanceOfRain: number}> || []).map((day, index) => (
                   <div key={index} className="bg-gray-50 rounded-xl p-4 text-center">
                     <div className="text-sm font-medium text-gray-600 mb-2">
                       {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })}
