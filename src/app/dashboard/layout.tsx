@@ -1,10 +1,8 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
-import toast from 'react-hot-toast';
 import { Menu, X } from 'lucide-react';
 
 export default function DashboardLayout({
@@ -12,22 +10,8 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { data: session, status } = useSession({
-    required: true,
-    onUnauthenticated() {
-      toast.error('Please sign in to access the dashboard');
-    },
-  });
-  const router = useRouter();
+  const { status } = useSession();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    if (status === 'loading') return;
-
-    if (!session) {
-      router.replace('/login');
-    }
-  }, [session, status, router]);
 
   // Loading state with a nice animation
   if (status === 'loading') {
@@ -39,8 +23,8 @@ export default function DashboardLayout({
     );
   }
 
-  // If not authenticated, show nothing while redirecting
-  if (!session) {
+  // Middleware handles authentication redirect
+  if (status === 'unauthenticated') {
     return null;
   }
 

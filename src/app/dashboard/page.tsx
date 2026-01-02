@@ -18,12 +18,12 @@ interface DiagnosisItem {
 }
 
 export default function DashboardPage() {
-  const { session, isAuthenticated } = useAuth();
+  const { session, isAuthenticated, isLoading } = useAuth();
   const [recent, setRecent] = useState<DiagnosisItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (isLoading || !isAuthenticated) {
       return;
     }
     const load = async () => {
@@ -39,9 +39,10 @@ export default function DashboardPage() {
       }
     };
     load();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isLoading]);
 
-  if (!isAuthenticated) {
+  // Show nothing while auth is being checked - middleware handles redirect
+  if (isLoading || !isAuthenticated) {
     return null;
   }
 
