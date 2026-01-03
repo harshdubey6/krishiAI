@@ -2,12 +2,16 @@ import type { NextConfig } from "next";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
-  // Prevent Next from picking a parent folder as the workspace root when other lockfiles exist.
+  // Ensure stable production builds
+  reactStrictMode: true,
+  // Set output file tracing root to this directory
   outputFileTracingRoot: __dirname,
+  // Optimize for production
+  poweredByHeader: false,
+  // Image optimization
   images: {
     remotePatterns: [
       {
@@ -27,6 +31,13 @@ const nextConfig: NextConfig = {
         hostname: 'lh3.googleusercontent.com',
       },
     ],
+  },
+  // Handle trailing slashes consistently
+  trailingSlash: false,
+  // Experimental features for better production performance
+  experimental: {
+    // Optimize package imports
+    optimizePackageImports: ['lucide-react', 'date-fns', 'recharts'],
   },
 };
 

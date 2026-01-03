@@ -14,7 +14,9 @@ interface WeatherAlert {
 interface WeatherData {
   location?: string;
   current?: {
+    location?: string;
     temperature?: number;
+    feelsLike?: number;
     humidity?: number;
     windSpeed?: number;
     condition?: string;

@@ -19,8 +19,10 @@ interface PriceItem {
   previousPrice?: number;
   minPrice?: number;
   maxPrice?: number;
+  modalPrice?: number;
   unit?: string;
   state?: string;
+  district?: string;
   trend?: string;
 }
 

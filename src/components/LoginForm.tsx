@@ -1,17 +1,29 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useState, useEffect } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 
 export default function LoginForm() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
   const [isLoading, setIsLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState({
     email: '',
     password: '',
   });
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      router.replace(callbackUrl);
+    }
+  }, [status, session, router, callbackUrl]);
 
   const validateForm = (email: string, password: string) => {
     const errors = {
@@ -66,21 +78,28 @@ export default function LoginForm() {
         email,
         password,
         redirect: false,
+        callbackUrl: callbackUrl,
       });
 
       if (result?.error) {
         toast.error('Invalid email or password. Please try again.');
+        setIsLoading(false);
         return;
       }
 
-      toast.success('Login successful! Redirecting...');
-      // Use window.location for reliable redirect in production
-      setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 1500);
+      if (result?.ok) {
+        toast.success('Login successful! Redirecting...');
+        // Use router.push for client-side navigation, fallback to window.location
+        router.push(callbackUrl);
+        // Fallback for edge cases where router doesn't work
+        setTimeout(() => {
+          if (window.location.pathname === '/login') {
+            window.location.href = callbackUrl;
+          }
+        }, 2000);
+      }
     } catch {
       toast.error('An error occurred during login');
-    } finally {
       setIsLoading(false);
     }
   };
