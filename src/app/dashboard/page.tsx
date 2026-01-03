@@ -41,9 +41,24 @@ export default function DashboardPage() {
     load();
   }, [isAuthenticated, isLoading]);
 
-  // Show nothing while auth is being checked - middleware handles redirect
-  if (isLoading || !isAuthenticated) {
-    return null;
+  // Show loading spinner while auth is being checked
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mb-4"></div>
+        <p className="text-gray-600">Loading dashboard...</p>
+      </div>
+    );
+  }
+
+  // Middleware handles authentication redirect
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mb-4"></div>
+        <p className="text-gray-600">Redirecting...</p>
+      </div>
+    );
   }
 
   const features = [

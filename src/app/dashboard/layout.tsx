@@ -25,7 +25,12 @@ export default function DashboardLayout({
 
   // Middleware handles authentication redirect
   if (status === 'unauthenticated') {
-    return null;
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mb-4"></div>
+        <p className="text-gray-600">Redirecting to login...</p>
+      </div>
+    );
   }
 
   return (
@@ -60,21 +65,22 @@ export default function DashboardLayout({
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div 
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          className="lg:hidden fixed inset-0 bg-black/40 z-30 backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
         />
       )}
 
       {/* Sidebar */}
       <aside className={`
-        fixed lg:static inset-y-0 left-0 z-50
-        w-80 sm:w-72 lg:w-64 flex-shrink-0
+        fixed lg:static inset-y-0 left-0 z-40
+        w-72 sm:w-72 lg:w-64 flex-shrink-0
         transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         <Sidebar onNavigate={() => setSidebarOpen(false)} />
       </aside>
-      <main className="flex-1 overflow-auto pt-16 lg:pt-0 px-3 py-4 sm:px-4 sm:py-5 lg:p-8 bg-gray-50">
+      <main className="flex-1 overflow-auto pt-16 lg:pt-0 px-3 py-4 sm:px-4 sm:py-5 lg:p-8 bg-gray-50 relative z-10">
         {children}
       </main>
     </div>
