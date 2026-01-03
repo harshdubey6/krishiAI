@@ -54,7 +54,8 @@ export default function DashboardPage() {
       icon: <Sprout className="w-10 h-10" />,
       href: '/dashboard/diagnose',
       gradient: 'from-emerald-400 via-green-500 to-green-600',
-      iconBg: 'from-emerald-50 to-green-50',
+      iconBg: 'bg-emerald-100',
+      iconColor: 'text-emerald-600',
       hoverGradient: 'hover:from-emerald-500 hover:via-green-600 hover:to-green-700'
     },
     {
@@ -64,7 +65,8 @@ export default function DashboardPage() {
       icon: <CloudSun className="w-10 h-10" />,
       href: '/dashboard/weather',
       gradient: 'from-sky-400 via-blue-500 to-blue-600',
-      iconBg: 'from-sky-50 to-blue-50',
+      iconBg: 'bg-blue-100',
+      iconColor: 'text-blue-600',
       hoverGradient: 'hover:from-sky-500 hover:via-blue-600 hover:to-blue-700'
     },
     {
@@ -74,7 +76,8 @@ export default function DashboardPage() {
       icon: <TrendingUp className="w-10 h-10" />,
       href: '/dashboard/prices',
       gradient: 'from-orange-400 via-orange-500 to-orange-600',
-      iconBg: 'from-orange-50 to-red-50',
+      iconBg: 'bg-orange-100',
+      iconColor: 'text-orange-600',
       hoverGradient: 'hover:from-orange-500 hover:via-orange-600 hover:to-red-600'
     },
     {
@@ -84,7 +87,8 @@ export default function DashboardPage() {
       icon: <BookOpen className="w-10 h-10" />,
       href: '/dashboard/guide',
       gradient: 'from-purple-400 via-purple-500 to-purple-600',
-      iconBg: 'from-purple-50 to-indigo-50',
+      iconBg: 'bg-purple-100',
+      iconColor: 'text-purple-600',
       hoverGradient: 'hover:from-purple-500 hover:via-purple-600 hover:to-indigo-600'
     }
   ];
@@ -94,7 +98,7 @@ export default function DashboardPage() {
       {/* Welcome Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-br from-green-600 via-green-600 to-emerald-700 rounded-2xl sm:rounded-3xl shadow-2xl mb-6 sm:mb-8">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yIDItNCAwLTZzLTQgMi02IDBjLTItMiAwLTQtMi02cy00IDAtNi0yYy0yLTIgMC00LTItNnMtNC0yLTYgMGMtMiAyLTQgMC02IDJzMCA0LTIgNmMtMiAyLTQgMC02IDJzMCA0IDIgNmMyIDIgNCAyIDYgMHMyIDQgNiAyczQtMiA2IDBjMiAyIDQgMCA2LTJzMi00IDAtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-10"></div>
-        
+
         <div className="relative px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-12">
           <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
             <div className="flex-1 w-full">
@@ -112,7 +116,7 @@ export default function DashboardPage() {
                 अपने कृषि डैशबोर्ड में आपका स्वागत है
               </p>
             </div>
-            
+
             <div className="w-full sm:w-auto">
               <div className="bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 border border-white/30">
                 <div className="text-white/80 text-xs font-medium mb-1">Total Scans</div>
@@ -132,15 +136,15 @@ export default function DashboardPage() {
             className="group relative overflow-hidden bg-white rounded-2xl sm:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-transparent active:scale-95 sm:hover:-translate-y-2"
           >
             <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                 style={{ background: `linear-gradient(135deg, ${feature.gradient.split(' ').join(', ')})` }}></div>
-            
+              style={{ background: `linear-gradient(135deg, ${feature.gradient.split(' ').join(', ')})` }}></div>
+
             <div className="relative p-5 sm:p-8">
-              <div className={`inline-flex bg-gradient-to-br ${feature.iconBg} rounded-2xl p-4 sm:p-5 mb-4 sm:mb-5 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-md`}>
-                <div className={`bg-gradient-to-br ${feature.gradient} text-transparent bg-clip-text`}>
+              <div className={`inline-flex ${feature.iconBg} rounded-2xl p-4 sm:p-5 mb-4 sm:mb-5 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-md`}>
+                <div className={`${feature.iconColor} group-hover:text-white transition-colors`}>
                   {feature.icon}
                 </div>
               </div>
-              
+
               <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 group-hover:text-white transition-colors">
                 {feature.title}
               </h3>
@@ -150,7 +154,7 @@ export default function DashboardPage() {
               <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 group-hover:text-white/80 transition-colors">
                 {feature.description}
               </p>
-              
+
               <div className="flex items-center gap-2 text-green-600 group-hover:text-white font-semibold transition-colors text-sm sm:text-base">
                 <span>Get Started</span>
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-2 transition-transform" />
@@ -210,15 +214,15 @@ export default function DashboardPage() {
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Recent Activity</h2>
               <p className="text-xs sm:text-sm text-gray-500">हालिया निदान / Your latest crop scans</p>
             </div>
-            <Link 
-              href="/dashboard/diagnose" 
+            <Link
+              href="/dashboard/diagnose"
               className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium shadow-md hover:shadow-lg text-sm sm:text-base whitespace-nowrap"
             >
               <span>View All</span>
               <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
             </Link>
           </div>
-          
+
           {loading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin rounded-full h-10 w-10 border-4 border-green-500 border-t-transparent"></div>
@@ -226,8 +230,8 @@ export default function DashboardPage() {
           ) : (
             <div className="space-y-4">
               {recent.map((d) => (
-                <div 
-                  key={d.id} 
+                <div
+                  key={d.id}
                   className="group p-4 sm:p-6 bg-gradient-to-br from-gray-50 to-green-50/30 rounded-2xl hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-green-200"
                 >
                   <div className="flex items-start justify-between gap-3 sm:gap-4">
@@ -238,11 +242,10 @@ export default function DashboardPage() {
                           <h3 className="font-bold text-base sm:text-lg text-gray-900">{d.cropType || d.plantType}</h3>
                         </div>
                         {d.severity && (
-                          <span className={`text-xs px-3 py-1.5 rounded-full font-semibold shadow-sm ${
-                            d.severity === 'severe' ? 'bg-red-500 text-white' :
+                          <span className={`text-xs px-3 py-1.5 rounded-full font-semibold shadow-sm ${d.severity === 'severe' ? 'bg-red-500 text-white' :
                             d.severity === 'moderate' ? 'bg-yellow-500 text-white' :
-                            'bg-green-500 text-white'
-                          }`}>
+                              'bg-green-500 text-white'
+                            }`}>
                             {d.severity.toUpperCase()}
                           </span>
                         )}
@@ -258,8 +261,8 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-4 text-xs text-gray-500">
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          {new Date(d.createdAt).toLocaleDateString('en-US', { 
-                            month: 'short', 
+                          {new Date(d.createdAt).toLocaleDateString('en-US', {
+                            month: 'short',
                             day: 'numeric',
                             hour: '2-digit',
                             minute: '2-digit'

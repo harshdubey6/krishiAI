@@ -80,6 +80,19 @@ export default function FarmerGuidePage() {
 
   const loadCropDetail = async (cropName: string) => {
     setLoadingDetail(true);
+    // Expand all sections when loading new crop
+    setExpandedSections({
+      overview: true,
+      climate: true,
+      soilType: true,
+      sowing: true,
+      irrigation: true,
+      fertilizer: true,
+      pests: true,
+      diseases: true,
+      harvesting: true,
+      yield: true
+    });
     try {
       const response = await fetch(`/api/crop-guide?crop=${encodeURIComponent(cropName)}`);
       const data = await response.json();
@@ -87,14 +100,14 @@ export default function FarmerGuidePage() {
       if (response.ok && data.status === 'success') {
         setSelectedCrop(data.data);
         if (data.source === 'ai') {
-          toast.success('Guide generated using AI');
+          toast.success('Guide generated using AI / AI द्वारा गाइड बनाया गया');
         }
       } else {
-        toast.error('Failed to load crop details');
+        toast.error(data.message || 'Failed to load crop details');
       }
     } catch (error) {
       console.error('Error loading crop detail:', error);
-      toast.error('Failed to load crop details');
+      toast.error('Failed to load crop details / फसल विवरण लोड करने में विफल');
     } finally {
       setLoadingDetail(false);
     }

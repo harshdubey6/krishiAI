@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginForm() {
   const { data: session, status } = useSession();
@@ -13,6 +14,7 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState({
     email: '',
     password: '',
@@ -114,11 +116,11 @@ export default function LoginForm() {
         }}>
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <Image 
-              src="/plant-logo.jpg" 
-              alt="AI Plant Doctor" 
-              width={120} 
-              height={120} 
+            <Image
+              src="/plant-logo.jpg"
+              alt="AI Plant Doctor"
+              width={120}
+              height={120}
               className="object-contain"
               priority
             />
@@ -137,9 +139,8 @@ export default function LoginForm() {
               name="email"
               type="email"
               required
-              className={`w-full px-4 py-3 border ${
-                validationErrors.email ? 'border-red-300' : 'border-gray-200'
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-400`}
+              className={`w-full px-4 py-3 border ${validationErrors.email ? 'border-red-300' : 'border-gray-200'
+                } rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-400`}
               placeholder="Enter your email"
             />
             {validationErrors.email && (
@@ -151,16 +152,28 @@ export default function LoginForm() {
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              className={`w-full px-4 py-3 border ${
-                validationErrors.password ? 'border-red-300' : 'border-gray-200'
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-400`}
-              placeholder="Enter your password"
-            />
+            <div className="relative">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                required
+                className={`w-full px-4 py-3 pr-12 border ${validationErrors.password ? 'border-red-300' : 'border-gray-200'
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-400`}
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
             {validationErrors.password && (
               <p className="mt-1 text-sm text-red-500">{validationErrors.password}</p>
             )}
