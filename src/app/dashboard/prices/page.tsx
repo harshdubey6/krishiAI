@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { TrendingUp, TrendingDown, Minus, Calculator, IndianRupee, BarChart3 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useLanguage } from '@/components/providers/LanguageProvider';
@@ -29,7 +28,6 @@ interface PriceItem {
 
 export default function MarketPricesPage() {
   const { data: session, status } = useSession();
-  const router = useRouter();
   const { t } = useLanguage();
   const [prices, setPrices] = useState<PriceItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,12 +66,7 @@ export default function MarketPricesPage() {
     }
   }, [searchCrop, searchState, t]);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      toast.error(t('Please sign in to access market prices', 'मंडी भाव देखने के लिए साइन इन करें'));
-      router.replace('/login');
-    }
-  }, [status, router, t]);
+  // Auth redirect is handled by dashboard layout and middleware
 
   useEffect(() => {
     if (status === 'authenticated') {

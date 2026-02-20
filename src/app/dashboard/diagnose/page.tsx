@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import { Sprout, AlertTriangle, TrendingUp, IndianRupee, Activity, CheckCircle, Upload, X, Sparkles } from 'lucide-react';
@@ -11,7 +10,6 @@ import { useLanguage } from '@/components/providers/LanguageProvider';
 
 export default function DiagnosePage() {
   const { data: session, status } = useSession();
-  const router = useRouter();
   const { t, language } = useLanguage();
   const [image, setImage] = useState<string | null>(null);
   const [cropType, setCropType] = useState('');
@@ -47,13 +45,7 @@ export default function DiagnosePage() {
     multiple: false,
   });
 
-  // Check authentication
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      toast.error(t('Please sign in to access crop diagnosis', 'कृपया साइन इन करें'));
-      router.replace('/login');
-    }
-  }, [status, router, t]);
+  // Auth redirect is handled by dashboard layout and middleware
 
   // Auto-scroll chat to bottom when messages change
   useEffect(() => {

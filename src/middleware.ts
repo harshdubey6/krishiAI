@@ -5,6 +5,7 @@ export default withAuth({
     authorized: ({ token }) => !!token,
   },
   pages: {
+    // Must match authOptions.pages.signIn — login UI is the home page with modal
     signIn: '/',
   },
 });

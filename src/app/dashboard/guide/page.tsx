@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { BookOpen, Search, Sprout, CloudSun, Droplets, Leaf, Bug, AlertTriangle, Scissors, TrendingUp, PlayCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
@@ -26,7 +25,6 @@ interface CropGuide {
 
 export default function FarmerGuidePage() {
   const { data: session, status } = useSession();
-  const router = useRouter();
   const { t, language } = useLanguage();
   const [guides, setGuides] = useState<CropGuide[]>([]);
   const [selectedCrop, setSelectedCrop] = useState<CropGuide | null>(null);
@@ -49,13 +47,7 @@ export default function FarmerGuidePage() {
     yield: false
   });
 
-  // Check authentication
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      toast.error(t('Please sign in to access farmer guide', 'कृपया साइन इन करें'));
-      router.replace('/?auth=login');
-    }
-  }, [status, router, t]);
+  // Auth redirect is handled by dashboard layout and middleware
 
   const loadCropDetail = useCallback(async (cropName: string) => {
     setLoadingDetail(true);

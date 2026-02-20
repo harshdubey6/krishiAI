@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { CloudSun, Droplets, Wind, Thermometer, AlertTriangle, Calendar, Sprout } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useLanguage } from '@/components/providers/LanguageProvider';
@@ -39,19 +38,13 @@ interface WeatherData {
 
 export default function WeatherPage() {
   const { data: session, status } = useSession();
-  const router = useRouter();
   const { t, language } = useLanguage();
   const [location, setLocation] = useState('');
   const [crop, setCrop] = useState('');
   const [loading, setLoading] = useState(false);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      toast.error(t('Please sign in to access weather information', 'मौसम जानकारी के लिए साइन इन करें'));
-      router.replace('/login');
-    }
-  }, [status, router, t]);
+  // Auth redirect is handled by dashboard layout and middleware
 
   if (status === 'loading') {
     return (
