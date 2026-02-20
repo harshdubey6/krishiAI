@@ -14,7 +14,6 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const cropName = searchParams.get('crop');
-    const language = normalizeGuideLanguage(searchParams.get('language'));
 
     if (cropName) {
       const normalizedCropName = normalizeCropName(cropName);
@@ -244,16 +243,16 @@ Keep it practical and farmer-friendly.`;
   // Parse the response into structured format
   return {
     cropName: cropName,
-    overview: cleanGuideText(extractSection(text, 'Overview')),
-    climate: cleanGuideText(extractSection(text, 'Climate')),
-    soilType: cleanGuideText(extractSection(text, 'Soil Type')),
-    sowing: cleanGuideText(extractSection(text, 'Sowing')),
-    irrigation: cleanGuideText(extractSection(text, 'Irrigation')),
-    fertilizer: cleanGuideText(extractSection(text, 'Fertilizer')),
-    pests: cleanGuideText(extractSection(text, 'Pests')),
-    diseases: cleanGuideText(extractSection(text, 'Diseases')),
-    harvesting: cleanGuideText(extractSection(text, 'Harvesting')),
-    yield: cleanGuideText(extractSection(text, 'Yield')),
+    overview: ensureTriLanguageField(extractSection(text, 'Overview')),
+    climate: ensureTriLanguageField(extractSection(text, 'Climate')),
+    soilType: ensureTriLanguageField(extractSection(text, 'Soil Type')),
+    sowing: ensureTriLanguageField(extractSection(text, 'Sowing')),
+    irrigation: ensureTriLanguageField(extractSection(text, 'Irrigation')),
+    fertilizer: ensureTriLanguageField(extractSection(text, 'Fertilizer')),
+    pests: ensureTriLanguageField(extractSection(text, 'Pests')),
+    diseases: ensureTriLanguageField(extractSection(text, 'Diseases')),
+    harvesting: ensureTriLanguageField(extractSection(text, 'Harvesting')),
+    yield: ensureTriLanguageField(extractSection(text, 'Yield')),
     videoUrls: [],
     imageUrl: null,
     language: 'multi'
@@ -338,13 +337,6 @@ function ensureTriLanguageField(value: string): string {
   }
 
   return `EN: ${cleaned}\nHI: ${cleaned}\nMR: ${cleaned}`;
-}
-
-function normalizeGuideLanguage(value: string | null): 'en' | 'hi' | 'mr' {
-  if (value === 'hi' || value === 'mr') {
-    return value;
-  }
-  return 'en';
 }
 
 function normalizeCropName(value: string): string {

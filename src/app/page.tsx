@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Sprout, CloudSun, TrendingUp, BookOpen, Users, Smartphone } from "lucide-react";
 import LanguageToggle from "@/components/LanguageToggle";
 import { useLanguage } from "@/components/providers/LanguageProvider";
@@ -12,24 +12,31 @@ import AuthModal from '@/components/AuthModal';
 export default function Home() {
   const { t } = useLanguage();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
-  const authParam = searchParams.get('auth');
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const [callbackUrl, setCallbackUrl] = useState('/dashboard');
 
   useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const authParam = params.get('auth');
+    const requestedCallbackUrl = params.get('callbackUrl') || '/dashboard';
+    setCallbackUrl(requestedCallbackUrl);
+
     if (authParam === 'login' || authParam === 'register') {
       setAuthMode(authParam);
       setAuthOpen(true);
       return;
     }
 
-    if (searchParams.get('callbackUrl')) {
+    if (params.get('callbackUrl')) {
       setAuthMode('login');
       setAuthOpen(true);
     }
-  }, [authParam, searchParams]);
+  }, []);
 
   const openAuth = (mode: 'login' | 'register') => {
     setAuthMode(mode);
@@ -38,6 +45,12 @@ export default function Home() {
 
   const closeAuth = () => {
     setAuthOpen(false);
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const searchParams = new URLSearchParams(window.location.search);
 
     if (!searchParams.get('auth') && !searchParams.get('callbackUrl')) {
       return;

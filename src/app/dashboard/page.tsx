@@ -3,7 +3,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Sprout, CloudSun, TrendingUp, BookOpen, AlertCircle, ArrowRight, Sparkles, Target, Shield, Clock, X } from 'lucide-react';
+import { Sprout, CloudSun, TrendingUp, BookOpen, AlertCircle, ArrowRight, Sparkles, Shield, Clock, X } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 
 // Define proper type for diagnosis history items
