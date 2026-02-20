@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { CloudSun, Droplets, Wind, Thermometer, AlertTriangle, Calendar, Sprout } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/components/providers/LanguageProvider';
 
 interface WeatherAlert {
   headline: string;
@@ -39,6 +40,7 @@ interface WeatherData {
 export default function WeatherPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t, language } = useLanguage();
   const [location, setLocation] = useState('');
   const [crop, setCrop] = useState('');
   const [loading, setLoading] = useState(false);
@@ -46,16 +48,16 @@ export default function WeatherPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      toast.error('Please sign in to access weather information');
+      toast.error(t('Please sign in to access weather information', 'मौसम जानकारी के लिए साइन इन करें'));
       router.replace('/login');
     }
-  }, [status, router]);
+  }, [status, router, t]);
 
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mb-4"></div>
-        <p className="text-gray-600">Loading...</p>
+        <p className="text-gray-600">{t('Loading...', 'लोड हो रहा है...')}</p>
       </div>
     );
   }
@@ -64,7 +66,7 @@ export default function WeatherPage() {
 
   const fetchWeather = async () => {
     if (!location.trim()) {
-      toast.error('Please enter a location');
+      toast.error(t('Please enter a location', 'कृपया स्थान दर्ज करें'));
       return;
     }
 
@@ -80,13 +82,13 @@ export default function WeatherPage() {
 
       if (data.status === 'success') {
         setWeatherData(data.data);
-        toast.success('Weather data loaded successfully');
+        toast.success(t('Weather data loaded successfully', 'मौसम डेटा सफलतापूर्वक लोड हुआ'));
       } else {
-        toast.error(data.message || 'Failed to fetch weather');
+        toast.error(data.message || t('Failed to fetch weather', 'मौसम डेटा प्राप्त करने में विफल'));
       }
     } catch (error) {
       console.error('Weather fetch error:', error);
-      toast.error('Failed to fetch weather data');
+      toast.error(t('Failed to fetch weather data', 'मौसम डेटा प्राप्त करने में विफल'));
     } finally {
       setLoading(false);
     }
@@ -97,9 +99,9 @@ export default function WeatherPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-            मौसम पूर्वानुमान / Weather Forecast
+            {t('Weather Forecast', 'मौसम पूर्वानुमान')}
           </h1>
-          <p className="text-gray-600">Get weather updates and crop-specific advisory</p>
+          <p className="text-gray-600">{t('Get weather updates and crop-specific advisory', 'मौसम अपडेट और फसल-विशिष्ट सलाह प्राप्त करें')}</p>
         </div>
 
         {/* Search Form */}
@@ -107,7 +109,7 @@ export default function WeatherPage() {
           <div className="grid md:grid-cols-3 gap-4">
             <div className="md:col-span-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Location / स्थान <span className="text-red-500">*</span>
+                {t('Location', 'स्थान')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -120,7 +122,7 @@ export default function WeatherPage() {
             </div>
             <div className="md:col-span-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Crop (Optional) / फसल
+                {t('Crop (Optional)', 'फसल (वैकल्पिक)')}
               </label>
               <input
                 type="text"
@@ -137,7 +139,7 @@ export default function WeatherPage() {
                 disabled={loading}
                 className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? 'Loading...' : 'Get Weather / मौसम देखें'}
+                {loading ? t('Loading...', 'लोड हो रहा है...') : t('Get Weather', 'मौसम देखें')}
               </button>
             </div>
           </div>
@@ -150,7 +152,7 @@ export default function WeatherPage() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-bold mb-1">{String(weatherData?.current?.location || '')}</h2>
-                  <p className="text-blue-100">Current Weather</p>
+                  <p className="text-blue-100">{t('Current Weather', 'वर्तमान मौसम')}</p>
                 </div>
                 <CloudSun className="w-16 h-16" />
               </div>
@@ -159,16 +161,16 @@ export default function WeatherPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <Thermometer className="w-5 h-5" />
-                    <span className="text-sm text-blue-100">Temperature</span>
+                    <span className="text-sm text-blue-100">{t('Temperature', 'तापमान')}</span>
                   </div>
                   <div className="text-3xl font-bold">{Number(weatherData?.current?.temperature || 0)}°C</div>
-                  <div className="text-sm text-blue-100">Feels like {Number(weatherData?.current?.feelsLike || 0)}°C</div>
+                  <div className="text-sm text-blue-100">{t('Feels like', 'अनुभव')} {Number(weatherData?.current?.feelsLike || 0)}°C</div>
                 </div>
                 
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <Droplets className="w-5 h-5" />
-                    <span className="text-sm text-blue-100">Humidity</span>
+                    <span className="text-sm text-blue-100">{t('Humidity', 'नमी')}</span>
                   </div>
                   <div className="text-3xl font-bold">{Number(weatherData?.current?.humidity || 0)}%</div>
                 </div>
@@ -176,7 +178,7 @@ export default function WeatherPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <Wind className="w-5 h-5" />
-                    <span className="text-sm text-blue-100">Wind Speed</span>
+                    <span className="text-sm text-blue-100">{t('Wind Speed', 'हवा की गति')}</span>
                   </div>
                   <div className="text-3xl font-bold">{Number(weatherData?.current?.windSpeed || 0)}</div>
                   <div className="text-sm text-blue-100">km/h</div>
@@ -185,7 +187,7 @@ export default function WeatherPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <CloudSun className="w-5 h-5" />
-                    <span className="text-sm text-blue-100">Condition</span>
+                    <span className="text-sm text-blue-100">{t('Condition', 'स्थिति')}</span>
                   </div>
                   <div className="text-lg font-semibold">{String(weatherData?.current?.condition || '')}</div>
                 </div>
@@ -197,7 +199,7 @@ export default function WeatherPage() {
               <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <AlertTriangle className="w-6 h-6 text-red-600" />
-                  <h3 className="text-xl font-bold text-red-900">Weather Alerts / मौसम चेतावनी</h3>
+                  <h3 className="text-xl font-bold text-red-900">{t('Weather Alerts', 'मौसम चेतावनी')}</h3>
                 </div>
                 <div className="space-y-3">
                   {weatherData.alerts.map((alert, index) => (
@@ -214,7 +216,7 @@ export default function WeatherPage() {
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <div className="flex items-center gap-3 mb-6">
                 <Sprout className="w-7 h-7 text-green-600" />
-                <h3 className="text-2xl font-bold text-gray-900">Farming Advisory / कृषि सलाह</h3>
+                <h3 className="text-2xl font-bold text-gray-900">{t('Farming Advisory', 'कृषि सलाह')}</h3>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
@@ -222,7 +224,7 @@ export default function WeatherPage() {
                 <div className="bg-blue-50 rounded-xl p-5">
                   <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
                     <Droplets className="w-5 h-5" />
-                    Irrigation / सिंचाई
+                    {t('Irrigation', 'सिंचाई')}
                   </h4>
                   <p className="text-gray-700">{String(weatherData?.advice?.irrigation || '')}</p>
                 </div>
@@ -231,7 +233,7 @@ export default function WeatherPage() {
                 <div className="bg-green-50 rounded-xl p-5">
                   <h4 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
                     <Sprout className="w-5 h-5" />
-                    Spraying / छिड़काव
+                    {t('Spraying', 'छिड़काव')}
                   </h4>
                   <p className="text-gray-700">{String(weatherData?.advice?.spraying || '')}</p>
                 </div>
@@ -240,7 +242,7 @@ export default function WeatherPage() {
               {/* Crop Specific Advice */}
               {weatherData?.advice?.cropSpecific && weatherData.advice.cropSpecific.length > 0 && (
                 <div className="mt-6 bg-yellow-50 rounded-xl p-5">
-                  <h4 className="font-semibold text-yellow-900 mb-3">Crop-Specific Advice</h4>
+                  <h4 className="font-semibold text-yellow-900 mb-3">{t('Crop-Specific Advice', 'फसल-विशिष्ट सलाह')}</h4>
                   <ul className="space-y-2">
                     {weatherData.advice.cropSpecific.map((tip, index) => (
                       <li key={index} className="flex items-start gap-2 text-gray-700">
@@ -257,14 +259,14 @@ export default function WeatherPage() {
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <div className="flex items-center gap-3 mb-6">
                 <Calendar className="w-7 h-7 text-blue-600" />
-                <h3 className="text-2xl font-bold text-gray-900">7-Day Forecast / 7 दिन का पूर्वानुमान</h3>
+                <h3 className="text-2xl font-bold text-gray-900">{t('7-Day Forecast', '7 दिन का पूर्वानुमान')}</h3>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
                 {(weatherData?.forecast as Array<{date: string; maxTemp: number; minTemp: number; condition: string; chanceOfRain: number}> || []).map((day, index) => (
                   <div key={index} className="bg-gray-50 rounded-xl p-4 text-center">
                     <div className="text-sm font-medium text-gray-600 mb-2">
-                      {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })}
+                      {new Date(day.date).toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-US', { weekday: 'short', day: 'numeric' })}
                     </div>
                     <div className="text-2xl font-bold text-gray-900 mb-1">
                       {day.maxTemp}°
@@ -288,10 +290,10 @@ export default function WeatherPage() {
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
             <CloudSun className="w-20 h-20 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              Enter your location to get weather forecast
+              {t('Enter your location to get weather forecast', 'मौसम पूर्वानुमान के लिए अपना स्थान दर्ज करें')}
             </h3>
             <p className="text-gray-500">
-              Get real-time weather updates and farming advisory
+              {t('Get real-time weather updates and farming advisory', 'रीयल-टाइम मौसम अपडेट और कृषि सलाह प्राप्त करें')}
             </p>
           </div>
         )}

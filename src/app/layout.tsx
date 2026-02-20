@@ -1,17 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Sora } from "next/font/google";
 import "./globals.css";
 import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
+import { LanguageProvider } from "@/components/providers/LanguageProvider";
 import { Toaster } from "react-hot-toast";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const sora = Sora({
+  variable: "--font-sora",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -28,27 +31,29 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${sora.variable} antialiased`}
       >
         <NextAuthProvider>
-          <Toaster position="top-right" toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#333',
-              color: '#fff',
-            },
-            success: {
+          <LanguageProvider>
+            <Toaster position="top-right" toastOptions={{
+              duration: 3000,
               style: {
-                background: '#22c55e',
+                background: '#333',
+                color: '#fff',
               },
-            },
-            error: {
-              style: {
-                background: '#ef4444',
+              success: {
+                style: {
+                  background: '#22c55e',
+                },
               },
-            },
-          }} />
-          {children}
+              error: {
+                style: {
+                  background: '#ef4444',
+                },
+              },
+            }} />
+            {children}
+          </LanguageProvider>
         </NextAuthProvider>
       </body>
     </html>

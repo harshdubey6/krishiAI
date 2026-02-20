@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { TrendingUp, TrendingDown, Minus, Calculator, IndianRupee, BarChart3 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/components/providers/LanguageProvider';
 
 interface CalcResult {
   estimatedRevenue: number;
@@ -29,6 +30,7 @@ interface PriceItem {
 export default function MarketPricesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useLanguage();
   const [prices, setPrices] = useState<PriceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchCrop, setSearchCrop] = useState('');
@@ -56,22 +58,22 @@ export default function MarketPricesPage() {
       if (data.status === 'success') {
         setPrices(data.data);
       } else {
-        toast.error(data.message || 'Failed to fetch prices');
+        toast.error(data.message || t('Failed to fetch prices', 'भाव प्राप्त करने में विफल'));
       }
     } catch (error) {
       console.error('Prices fetch error:', error);
-      toast.error('Failed to fetch market prices');
+      toast.error(t('Failed to fetch market prices', 'मंडी भाव प्राप्त करने में विफल'));
     } finally {
       setLoading(false);
     }
-  }, [searchCrop, searchState]);
+  }, [searchCrop, searchState, t]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      toast.error('Please sign in to access market prices');
+      toast.error(t('Please sign in to access market prices', 'मंडी भाव देखने के लिए साइन इन करें'));
       router.replace('/login');
     }
-  }, [status, router]);
+  }, [status, router, t]);
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -83,7 +85,7 @@ export default function MarketPricesPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mb-4"></div>
-        <p className="text-gray-600">Loading...</p>
+        <p className="text-gray-600">{t('Loading...', 'लोड हो रहा है...')}</p>
       </div>
     );
   }
@@ -92,7 +94,7 @@ export default function MarketPricesPage() {
 
   const calculateProfit = async () => {
     if (!calcCrop || !calcQuantity || !calcCost) {
-      toast.error('Please fill all calculator fields');
+      toast.error(t('Please fill all calculator fields', 'कृपया कैलकुलेटर के सभी फ़ील्ड भरें'));
       return;
     }
 
@@ -109,13 +111,13 @@ export default function MarketPricesPage() {
 
       if (data.status === 'success') {
         setCalcResult(data.data);
-        toast.success('Profit calculated successfully');
+        toast.success(t('Profit calculated successfully', 'लाभ सफलतापूर्वक गणना किया गया'));
       } else {
-        toast.error(data.message || 'Failed to calculate');
+        toast.error(data.message || t('Failed to calculate', 'गणना विफल रही'));
       }
     } catch (error) {
       console.error('Calculate error:', error);
-      toast.error('Failed to calculate profit');
+      toast.error(t('Failed to calculate profit', 'लाभ की गणना विफल रही'));
     }
   };
 
@@ -128,11 +130,11 @@ export default function MarketPricesPage() {
     const percentage = avgPrice > 0 ? (diff / avgPrice) * 100 : 0;
 
     if (percentage > 2) {
-      return { icon: <TrendingUp className="w-5 h-5 text-green-600" />, color: 'text-green-600', text: 'High' };
+      return { icon: <TrendingUp className="w-5 h-5 text-green-600" />, color: 'text-green-600', text: t('High', 'ऊँचा') };
     } else if (percentage < -2) {
-      return { icon: <TrendingDown className="w-5 h-5 text-red-600" />, color: 'text-red-600', text: 'Low' };
+      return { icon: <TrendingDown className="w-5 h-5 text-red-600" />, color: 'text-red-600', text: t('Low', 'कम') };
     }
-    return { icon: <Minus className="w-5 h-5 text-gray-600" />, color: 'text-gray-600', text: 'Stable' };
+    return { icon: <Minus className="w-5 h-5 text-gray-600" />, color: 'text-gray-600', text: t('Stable', 'स्थिर') };
   };
 
   return (
@@ -140,9 +142,9 @@ export default function MarketPricesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-            मंडी भाव / Market Prices
+            {t('Market Prices', 'मंडी भाव')}
           </h1>
-          <p className="text-gray-600">Live agricultural commodity prices across markets</p>
+          <p className="text-gray-600">{t('Live agricultural commodity prices across markets', 'विभिन्न बाजारों में कृषि उत्पादों के लाइव भाव')}</p>
         </div>
 
         {/* Search & Calculator Buttons */}
@@ -150,7 +152,7 @@ export default function MarketPricesPage() {
           <div className="grid md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search Crop / फसल खोजें
+                {t('Search Crop', 'फसल खोजें')}
               </label>
               <input
                 type="text"
@@ -163,7 +165,7 @@ export default function MarketPricesPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                State / राज्य
+                {t('State', 'राज्य')}
               </label>
               <input
                 type="text"
@@ -180,7 +182,7 @@ export default function MarketPricesPage() {
                 disabled={loading}
                 className="w-full bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-700 disabled:bg-gray-400 transition-colors"
               >
-                Search / खोजें
+                {t('Search', 'खोजें')}
               </button>
             </div>
             <div className="flex items-end">
@@ -189,7 +191,7 @@ export default function MarketPricesPage() {
                 className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
               >
                 <Calculator className="w-5 h-5" />
-                Calculator
+                {t('Calculator', 'कैलकुलेटर')}
               </button>
             </div>
           </div>
@@ -200,12 +202,12 @@ export default function MarketPricesPage() {
           <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl p-6 mb-8 text-white">
             <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
               <Calculator className="w-7 h-7" />
-              Profit Calculator / लाभ कैलकुलेटर
+              {t('Profit Calculator', 'लाभ कैलकुलेटर')}
             </h2>
             
             <div className="grid md:grid-cols-3 gap-4 mb-6">
               <div>
-                <label className="block text-sm font-medium text-blue-100 mb-2">Crop Name</label>
+                <label className="block text-sm font-medium text-blue-100 mb-2">{t('Crop Name', 'फसल का नाम')}</label>
                 <input
                   type="text"
                   value={calcCrop}
@@ -215,7 +217,7 @@ export default function MarketPricesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-blue-100 mb-2">Quantity (Quintal)</label>
+                <label className="block text-sm font-medium text-blue-100 mb-2">{t('Quantity (Quintal)', 'मात्रा (क्विंटल)')}</label>
                 <input
                   type="number"
                   value={calcQuantity}
@@ -225,7 +227,7 @@ export default function MarketPricesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-blue-100 mb-2">Cultivation Cost (₹)</label>
+                <label className="block text-sm font-medium text-blue-100 mb-2">{t('Cultivation Cost (₹)', 'खेती लागत (₹)')}</label>
                 <input
                   type="number"
                   value={calcCost}
@@ -240,23 +242,23 @@ export default function MarketPricesPage() {
               onClick={calculateProfit}
               className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
             >
-              Calculate Profit / लाभ की गणना करें
+              {t('Calculate Profit', 'लाभ की गणना करें')}
             </button>
 
             {calcResult && (
               <div className="mt-6 grid md:grid-cols-3 gap-4">
                 <div className="bg-white/20 backdrop-blur rounded-xl p-4">
-                  <div className="text-sm text-blue-100 mb-1">Estimated Revenue</div>
+                  <div className="text-sm text-blue-100 mb-1">{t('Estimated Revenue', 'अनुमानित राजस्व')}</div>
                   <div className="text-2xl font-bold">₹{calcResult.estimatedRevenue?.toLocaleString('en-IN') || 0}</div>
                 </div>
                 <div className="bg-white/20 backdrop-blur rounded-xl p-4">
-                  <div className="text-sm text-blue-100 mb-1">Estimated Profit</div>
+                  <div className="text-sm text-blue-100 mb-1">{t('Estimated Profit', 'अनुमानित लाभ')}</div>
                   <div className={`text-2xl font-bold ${calcResult.profit >= 0 ? 'text-green-300' : 'text-red-300'}`}>
                     ₹{calcResult.profit?.toLocaleString('en-IN') || 0}
                   </div>
                 </div>
                 <div className="bg-white/20 backdrop-blur rounded-xl p-4">
-                  <div className="text-sm text-blue-100 mb-1">Profit Margin</div>
+                  <div className="text-sm text-blue-100 mb-1">{t('Profit Margin', 'लाभ मार्जिन')}</div>
                   <div className={`text-2xl font-bold ${calcResult.profitMargin >= 0 ? 'text-green-300' : 'text-red-300'}`}>
                     {calcResult.profitMargin || 0}%
                   </div>
@@ -287,27 +289,27 @@ export default function MarketPricesPage() {
                   </div>
 
                   <div className="bg-orange-50 rounded-xl p-4 mb-4">
-                    <div className="text-sm text-gray-600 mb-1">Modal Price</div>
+                    <div className="text-sm text-gray-600 mb-1">{t('Modal Price', 'मॉडल भाव')}</div>
                     <div className="text-3xl font-bold text-orange-600 flex items-center gap-2">
                       <IndianRupee className="w-7 h-7" />
                       {Number(price?.modalPrice || 0)}
                     </div>
-                    <div className="text-sm text-gray-600">per {String(price?.unit || '')}</div>
+                    <div className="text-sm text-gray-600">{t('per', 'प्रति')} {String(price?.unit || '')}</div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <div className="text-xs text-gray-600 mb-1">Min Price</div>
+                      <div className="text-xs text-gray-600 mb-1">{t('Min Price', 'न्यूनतम भाव')}</div>
                       <div className="text-lg font-semibold text-gray-900">₹{Number(price?.minPrice || 0)}</div>
                     </div>
                     <div>
-                      <div className="text-xs text-gray-600 mb-1">Max Price</div>
+                      <div className="text-xs text-gray-600 mb-1">{t('Max Price', 'अधिकतम भाव')}</div>
                       <div className="text-lg font-semibold text-gray-900">₹{Number(price?.maxPrice || 0)}</div>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Status:</span>
+                    <span className="text-gray-600">{t('Status:', 'स्थिति:')}</span>
                     <span className={`font-semibold ${indicator.color}`}>{indicator.text}</span>
                   </div>
                 </div>

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
 import { Home, Camera, Cloud, TrendingUp, BookOpen, LogOut, Leaf } from 'lucide-react';
+import { useLanguage } from '@/components/providers/LanguageProvider';
 
 interface NavItem {
   name: string;
@@ -20,39 +21,40 @@ interface SidebarProps {
 export default function Sidebar({ onNavigate }: SidebarProps = {}) {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { t } = useLanguage();
 
   const handleLogout = async () => {
     try {
       await signOut({ redirect: true, callbackUrl: '/login' });
-      toast.success('Logged out successfully');
+      toast.success(t('Logged out successfully', 'सफलतापूर्वक लॉग आउट हो गया', 'यशस्वीरित्या लॉग आउट झाले'));
     } catch {
-      toast.error('Failed to logout');
+      toast.error(t('Failed to logout', 'लॉग आउट करने में विफल', 'लॉग आउट करण्यात अयशस्वी'));
     }
   };
 
   const navigation: NavItem[] = [
     {
-      name: 'Dashboard',
+      name: t('Dashboard', 'डैशबोर्ड', 'डॅशबोर्ड'),
       href: '/dashboard',
       icon: <Home className="w-6 h-6" />,
     },
     {
-      name: 'Crop Diagnosis',
+      name: t('Crop Diagnosis', 'फसल निदान', 'पीक निदान'),
       href: '/dashboard/diagnose',
       icon: <Camera className="w-6 h-6" />,
     },
     {
-      name: 'Weather Forecast',
+      name: t('Weather Forecast', 'मौसम पूर्वानुमान', 'हवामान अंदाज'),
       href: '/dashboard/weather',
       icon: <Cloud className="w-6 h-6" />,
     },
     {
-      name: 'Market Prices',
+      name: t('Market Prices', 'मंडी भाव', 'बाजार भाव'),
       href: '/dashboard/prices',
       icon: <TrendingUp className="w-6 h-6" />,
     },
     {
-      name: 'Farmer Guide',
+      name: t('Farmer Guide', 'किसान मार्गदर्शिका', 'शेतकरी मार्गदर्शक'),
       href: '/dashboard/guide',
       icon: <BookOpen className="w-6 h-6" />,
     },
@@ -66,7 +68,7 @@ export default function Sidebar({ onNavigate }: SidebarProps = {}) {
           <Leaf className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
         </div>
         <h1 className="text-xl sm:text-2xl font-bold text-green-600">KrishiAI</h1>
-        <p className="text-xs sm:text-sm text-gray-500 mt-1">Farmer&apos;s Platform</p>
+        <p className="text-xs sm:text-sm text-gray-500 mt-1">{t("Farmer's Platform", 'किसान मंच', 'शेतकरी प्लॅटफॉर्म')}</p>
       </div>
 
       {/* Navigation */}
@@ -109,7 +111,7 @@ export default function Sidebar({ onNavigate }: SidebarProps = {}) {
             rounded-lg transition-all touch-manipulation active:scale-95"
         >
           <LogOut className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
-          <span className="font-medium text-sm sm:text-base">Logout</span>
+          <span className="font-medium text-sm sm:text-base">{t('Logout', 'लॉगआउट', 'लॉगआउट')}</span>
         </button>
       </div>
     </div>

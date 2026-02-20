@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get diagnosis from Gemini API
-    const aiResult = await analyzePlantImage(image, cropType, symptoms);
+    const aiResult = await analyzePlantImage(image, cropType, symptoms, String(language || 'en'));
 
     // Ensure we have an authenticated user id
     const userId = (session as {user?: {id?: string}})?.user?.id;
@@ -101,6 +101,9 @@ export async function POST(req: NextRequest) {
       data: {
         id: savedDiagnosis.id,
         diagnosis: aiResult.diagnosis ?? null,
+        severity: aiResult.severity ?? null,
+        confidence: typeof aiResult.confidence === 'number' ? aiResult.confidence : null,
+        estimatedCost: typeof aiResult.estimatedCost === 'number' ? aiResult.estimatedCost : null,
         causes: aiResult.causes ?? [],
         treatment: aiResult.treatment ?? [],
         prevention: aiResult.prevention ?? [],

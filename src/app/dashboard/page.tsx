@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Sprout, CloudSun, TrendingUp, BookOpen, AlertCircle, ArrowRight, Sparkles, Target, Shield, Clock } from 'lucide-react';
+import { useLanguage } from '@/components/providers/LanguageProvider';
 
 // Define proper type for diagnosis history items
 interface DiagnosisItem {
@@ -19,6 +20,7 @@ interface DiagnosisItem {
 
 export default function DashboardPage() {
   const { session, isAuthenticated, isLoading } = useAuth();
+  const { t } = useLanguage();
   const [recent, setRecent] = useState<DiagnosisItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -46,7 +48,7 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mb-4"></div>
-        <p className="text-gray-600">Loading dashboard...</p>
+        <p className="text-gray-600">{t('Loading dashboard...', 'डैशबोर्ड लोड हो रहा है...')}</p>
       </div>
     );
   }
@@ -56,16 +58,15 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mb-4"></div>
-        <p className="text-gray-600">Redirecting...</p>
+        <p className="text-gray-600">{t('Redirecting...', 'रीडायरेक्ट हो रहा है...')}</p>
       </div>
     );
   }
 
   const features = [
     {
-      title: 'फसल निदान',
-      titleEn: 'Crop Diagnosis',
-      description: 'AI-powered disease detection & treatment',
+      title: t('Crop Diagnosis', 'फसल निदान'),
+      description: t('AI-powered disease detection & treatment', 'AI आधारित रोग पहचान और उपचार'),
       icon: <Sprout className="w-10 h-10" />,
       href: '/dashboard/diagnose',
       gradient: 'from-emerald-400 via-green-500 to-green-600',
@@ -74,9 +75,8 @@ export default function DashboardPage() {
       hoverGradient: 'hover:from-emerald-500 hover:via-green-600 hover:to-green-700'
     },
     {
-      title: 'मौसम पूर्वानुमान',
-      titleEn: 'Weather Forecast',
-      description: '7-day forecast & farming advisory',
+      title: t('Weather Forecast', 'मौसम पूर्वानुमान'),
+      description: t('7-day forecast & farming advisory', '7 दिन का पूर्वानुमान और कृषि सलाह'),
       icon: <CloudSun className="w-10 h-10" />,
       href: '/dashboard/weather',
       gradient: 'from-sky-400 via-blue-500 to-blue-600',
@@ -85,9 +85,8 @@ export default function DashboardPage() {
       hoverGradient: 'hover:from-sky-500 hover:via-blue-600 hover:to-blue-700'
     },
     {
-      title: 'मंडी भाव',
-      titleEn: 'Market Prices',
-      description: 'Live rates & profit calculator',
+      title: t('Market Prices', 'मंडी भाव'),
+      description: t('Live rates & profit calculator', 'लाइव भाव और लाभ कैलकुलेटर'),
       icon: <TrendingUp className="w-10 h-10" />,
       href: '/dashboard/prices',
       gradient: 'from-orange-400 via-orange-500 to-orange-600',
@@ -96,9 +95,8 @@ export default function DashboardPage() {
       hoverGradient: 'hover:from-orange-500 hover:via-orange-600 hover:to-red-600'
     },
     {
-      title: 'कृषि मार्गदर्शिका',
-      titleEn: 'Farmer Guide',
-      description: 'Complete crop cultivation guides',
+      title: t('Farmer Guide', 'कृषि मार्गदर्शिका'),
+      description: t('Complete crop cultivation guides', 'संपूर्ण फसल खेती मार्गदर्शिका'),
       icon: <BookOpen className="w-10 h-10" />,
       href: '/dashboard/guide',
       gradient: 'from-purple-400 via-purple-500 to-purple-600',
@@ -122,13 +120,10 @@ export default function DashboardPage() {
                 <span className="text-white text-xs sm:text-sm font-medium">KrishiAI Platform</span>
               </div>
               <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 text-white drop-shadow-lg break-words">
-                नमस्ते, <span className="text-yellow-300">{session?.user?.name?.split(' ')[0] || 'किसान भाई'}</span>!
+                {t('Hello,', 'नमस्ते,')} <span className="text-yellow-300">{session?.user?.name?.split(' ')[0] || t('Farmer', 'किसान भाई')}</span>!
               </h1>
               <p className="text-green-50 text-sm sm:text-base lg:text-lg font-medium mb-1 sm:mb-2">
-                Welcome to your farming dashboard
-              </p>
-              <p className="text-green-100 text-xs sm:text-sm">
-                अपने कृषि डैशबोर्ड में आपका स्वागत है
+                {t('Welcome to your farming dashboard', 'अपने कृषि डैशबोर्ड में आपका स्वागत है')}
               </p>
             </div>
 
@@ -150,8 +145,7 @@ export default function DashboardPage() {
             href={feature.href}
             className="group relative overflow-hidden bg-white rounded-2xl sm:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-transparent active:scale-95 sm:hover:-translate-y-2"
           >
-            <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-              style={{ background: `linear-gradient(135deg, ${feature.gradient.split(' ').join(', ')})` }}></div>
+            <div className={`absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${feature.gradient}`}></div>
 
             <div className="relative p-5 sm:p-8">
               <div className={`inline-flex ${feature.iconBg} rounded-2xl p-4 sm:p-5 mb-4 sm:mb-5 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-md`}>
@@ -163,15 +157,12 @@ export default function DashboardPage() {
               <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 group-hover:text-white transition-colors">
                 {feature.title}
               </h3>
-              <p className="text-sm sm:text-base font-semibold text-gray-600 mb-2 sm:mb-3 group-hover:text-white/90 transition-colors">
-                {feature.titleEn}
-              </p>
               <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 group-hover:text-white/80 transition-colors">
                 {feature.description}
               </p>
 
               <div className="flex items-center gap-2 text-green-600 group-hover:text-white font-semibold transition-colors text-sm sm:text-base">
-                <span>Get Started</span>
+                <span>{t('Get Started', 'शुरू करें')}</span>
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-2 transition-transform" />
               </div>
             </div>
@@ -227,13 +218,13 @@ export default function DashboardPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Recent Activity</h2>
-              <p className="text-xs sm:text-sm text-gray-500">हालिया निदान / Your latest crop scans</p>
+              <p className="text-xs sm:text-sm text-gray-500">{t('Your latest crop scans', 'आपके हालिया फसल स्कैन')}</p>
             </div>
             <Link
               href="/dashboard/diagnose"
               className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium shadow-md hover:shadow-lg text-sm sm:text-base whitespace-nowrap"
             >
-              <span>View All</span>
+              <span>{t('View All', 'सभी देखें')}</span>
               <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
             </Link>
           </div>
@@ -307,14 +298,14 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-3">Start Your First Diagnosis</h3>
             <p className="text-gray-600 mb-6">
-              Upload a photo of your crop to get AI-powered disease detection and treatment recommendations.
+              {t('Upload a photo of your crop to get AI-powered disease detection and treatment recommendations.', 'AI आधारित रोग पहचान और उपचार सलाह पाने के लिए अपनी फसल की फोटो अपलोड करें।')}
             </p>
             <Link
               href="/dashboard/diagnose"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <Sprout className="w-5 h-5" />
-              <span>Diagnose Crop Now</span>
+              <span>{t('Diagnose Crop Now', 'अभी फसल निदान करें')}</span>
               <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
@@ -330,7 +321,7 @@ export default function DashboardPage() {
             </div>
             <div>
               <h3 className="text-2xl font-bold text-white">Smart Farming Tips</h3>
-              <p className="text-blue-100 text-sm">कृषि सुझाव / Expert recommendations</p>
+              <p className="text-blue-100 text-sm">{t('Expert recommendations', 'विशेषज्ञ सुझाव')}</p>
             </div>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">

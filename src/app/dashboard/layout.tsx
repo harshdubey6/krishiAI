@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
+import LanguageToggle from '@/components/LanguageToggle';
 import { Menu, X } from 'lucide-react';
 
 export default function DashboardLayout({
@@ -49,16 +50,19 @@ export default function DashboardLayout({
               <p className="text-[10px] sm:text-xs text-gray-500">Farmer&apos;s Platform</p>
             </div>
           </div>
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors"
-          >
-            {sidebarOpen ? (
-              <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
-            ) : (
-              <Menu className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <LanguageToggle compact className="shrink-0" />
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors"
+            >
+              {sidebarOpen ? (
+                <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
+              ) : (
+                <Menu className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -80,7 +84,10 @@ export default function DashboardLayout({
       `}>
         <Sidebar onNavigate={() => setSidebarOpen(false)} />
       </aside>
-      <main className="flex-1 overflow-auto pt-16 lg:pt-0 px-3 py-4 sm:px-4 sm:py-5 lg:p-8 bg-gray-50 relative z-10">
+      <main className="flex-1 overflow-auto pt-16 px-3 pb-4 sm:px-4 sm:pb-5 lg:px-6 lg:pb-6 lg:pt-3 bg-gray-50 relative z-10">
+        <div className="hidden lg:flex justify-end mb-2 sticky top-3 z-20">
+          <LanguageToggle className="shrink-0" />
+        </div>
         {children}
       </main>
     </div>
