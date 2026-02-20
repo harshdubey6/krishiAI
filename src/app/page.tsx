@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Sprout, CloudSun, TrendingUp, BookOpen, Users, Smartphone } from "lucide-react";
 import LanguageToggle from "@/components/LanguageToggle";
 import { useLanguage } from "@/components/providers/LanguageProvider";
@@ -12,9 +13,21 @@ import AuthModal from '@/components/AuthModal';
 export default function Home() {
   const { t } = useLanguage();
   const router = useRouter();
+  const { data: session } = useSession();
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [callbackUrl, setCallbackUrl] = useState('/dashboard');
+
+  // Navigate to a protected page — if not logged in, open register modal instead
+  const handleProtectedLink = (destination: string) => {
+    if (session) {
+      router.push(destination);
+    } else {
+      setCallbackUrl(destination);
+      setAuthMode('register');
+      setAuthOpen(true);
+    }
+  };
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -157,12 +170,13 @@ export default function Home() {
                 >
                   {t('Get Started', 'अभी शुरू करें', 'आता सुरू करा')}
                 </button>
-                <Link 
-                  href="/dashboard/diagnose" 
+                <button
+                  type="button"
+                  onClick={() => handleProtectedLink('/dashboard/diagnose')}
                   className="inline-flex items-center justify-center rounded-full border-2 border-green-600 text-green-700 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold hover:bg-green-50 transition-all"
                 >
                   {t('Check Crop', 'फसल जांचें', 'पीक तपासा')}
-                </Link>
+                </button>
               </div>
               
               {/* Trust Indicators */}
@@ -307,9 +321,9 @@ export default function Home() {
             <div>
               <h4 className="font-bold text-gray-900 mb-3">{t('Services', 'सेवाएं', 'सेवा')}</h4>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li><Link href="/dashboard/diagnose" className="hover:text-green-600">{t('Crop Diagnosis', 'फसल निदान', 'पीक निदान')}</Link></li>
-                <li><Link href="/dashboard/weather" className="hover:text-green-600">{t('Weather Alerts', 'मौसम अलर्ट', 'हवामान अलर्ट')}</Link></li>
-                <li><Link href="/dashboard/prices" className="hover:text-green-600">{t('Market Prices', 'मंडी भाव', 'बाजारभाव')}</Link></li>
+                <li><button type="button" onClick={() => handleProtectedLink('/dashboard/diagnose')} className="hover:text-green-600 text-left">{t('Crop Diagnosis', 'फसल निदान', 'पीक निदान')}</button></li>
+                <li><button type="button" onClick={() => handleProtectedLink('/dashboard/weather')} className="hover:text-green-600 text-left">{t('Weather Alerts', 'मौसम अलर्ट', 'हवामान अलर्ट')}</button></li>
+                <li><button type="button" onClick={() => handleProtectedLink('/dashboard/prices')} className="hover:text-green-600 text-left">{t('Market Prices', 'मंडी भाव', 'बाजारभाव')}</button></li>
               </ul>
             </div>
             <div>

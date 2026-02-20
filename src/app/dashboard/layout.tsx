@@ -1,7 +1,8 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import LanguageToggle from '@/components/LanguageToggle';
 import { Menu, X } from 'lucide-react';
@@ -12,9 +13,17 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { status } = useSession();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Loading state with a nice animation
+  // Safety-net redirect if middleware lets an unauthenticated request through
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.replace('/');
+    }
+  }, [status, router]);
+
+  // Loading state
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
@@ -24,7 +33,7 @@ export default function DashboardLayout({
     );
   }
 
-  // Middleware handles authentication redirect
+  // Middleware handles authentication redirect; show spinner while redirecting
   if (status === 'unauthenticated') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
