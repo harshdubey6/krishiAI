@@ -13,9 +13,10 @@ interface AuthModalProps {
   open: boolean;
   mode: AuthMode;
   onClose: () => void;
+  callbackUrl?: string;
 }
 
-export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
+export default function AuthModal({ open, mode, onClose, callbackUrl }: AuthModalProps) {
   const router = useRouter();
   const { t } = useLanguage();
   const [activeMode, setActiveMode] = useState<AuthMode>(mode);
@@ -73,6 +74,8 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
   };
 
   const handleLogin = async () => {
+    const destination = callbackUrl || '/dashboard';
+
     if (!form.email || !form.password) {
       toast.error(t('Email and password are required', 'ईमेल और पासवर्ड आवश्यक हैं', 'ईमेल आणि पासवर्ड आवश्यक आहेत'));
       return;
@@ -84,7 +87,7 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
         email: form.email,
         password: form.password,
         redirect: false,
-        callbackUrl: '/dashboard',
+        callbackUrl: destination,
       });
 
       if (result?.error) {
@@ -94,7 +97,7 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
 
       toast.success(t('Login successful', 'लॉगिन सफल', 'लॉगिन यशस्वी'));
       onClose();
-      router.push('/dashboard');
+      router.push(destination);
     } catch {
       toast.error(t('Login failed', 'लॉगिन विफल', 'लॉगिन अयशस्वी'));
     } finally {
@@ -157,30 +160,30 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
       <div
-        className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-gray-200"
+        className="w-full max-w-xl rounded-2xl bg-white shadow-2xl border border-gray-200"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 pt-5">
+        <div className="flex items-center justify-between px-7 pt-7">
           <div>
-            <h3 className="text-2xl font-bold text-gray-900">{title}</h3>
-            <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
+            <h3 className="text-3xl font-bold text-gray-900">{title}</h3>
+            <p className="text-base text-gray-500 mt-2">{subtitle}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+            className="rounded-lg p-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="px-5 pt-4">
+        <div className="px-7 pt-5">
           <div className="grid grid-cols-2 rounded-xl bg-gray-100 p-1">
             <button
               type="button"
               onClick={() => setActiveMode('login')}
-              className={`rounded-lg py-2 text-sm font-semibold transition ${
+              className={`rounded-lg py-2.5 text-base font-semibold transition ${
                 activeMode === 'login' ? 'bg-white text-green-700 shadow-sm' : 'text-gray-600'
               }`}
             >
@@ -189,7 +192,7 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
             <button
               type="button"
               onClick={() => setActiveMode('register')}
-              className={`rounded-lg py-2 text-sm font-semibold transition ${
+              className={`rounded-lg py-2.5 text-base font-semibold transition ${
                 activeMode === 'register' ? 'bg-white text-green-700 shadow-sm' : 'text-gray-600'
               }`}
             >
@@ -198,14 +201,14 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-5 py-5 space-y-4">
+        <form onSubmit={handleSubmit} className="px-7 py-7 space-y-5">
           {activeMode === 'register' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <input
                 type="text"
                 value={form.firstName}
                 onChange={(event) => handleInput('firstName', event.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder={t('First name', 'पहला नाम', 'पहिले नाव')}
                 required
               />
@@ -213,7 +216,7 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
                 type="text"
                 value={form.lastName}
                 onChange={(event) => handleInput('lastName', event.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder={t('Last name', 'अंतिम नाम', 'आडनाव')}
                 required
               />
@@ -224,7 +227,7 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
             type="email"
             value={form.email}
             onChange={(event) => handleInput('email', event.target.value)}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
             placeholder={t('Email address', 'ईमेल पता', 'ईमेल पत्ता')}
             required
           />
@@ -234,7 +237,7 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
               type={showPassword ? 'text' : 'password'}
               value={form.password}
               onChange={(event) => handleInput('password', event.target.value)}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2.5 pr-11 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full rounded-lg border border-gray-200 px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder={t('Password', 'पासवर्ड', 'पासवर्ड')}
               required
             />
@@ -250,7 +253,7 @@ export default function AuthModal({ open, mode, onClose }: AuthModalProps) {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-lg bg-green-600 py-2.5 font-semibold text-white hover:bg-green-700 disabled:opacity-60"
+            className="w-full rounded-lg bg-green-600 py-3.5 text-lg font-semibold text-white hover:bg-green-700 disabled:opacity-60"
           >
             {isLoading
               ? t('Please wait...', 'कृपया प्रतीक्षा करें...', 'कृपया प्रतीक्षा करा...')

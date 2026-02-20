@@ -31,8 +31,10 @@ export default function FarmerGuidePage() {
   const [guides, setGuides] = useState<CropGuide[]>([]);
   const [selectedCrop, setSelectedCrop] = useState<CropGuide | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [newCropName, setNewCropName] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [addingCrop, setAddingCrop] = useState(false);
   const hasAutoLoadedCropRef = useRef(false);
   const [expandedSections, setExpandedSections] = useState<{[key: string]: boolean}>({
     overview: true,
@@ -51,7 +53,7 @@ export default function FarmerGuidePage() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       toast.error(t('Please sign in to access farmer guide', 'कृपया साइन इन करें'));
-      router.replace('/login');
+      router.replace('/?auth=login');
     }
   }, [status, router, t]);
 
@@ -62,10 +64,27 @@ export default function FarmerGuidePage() {
       const data = await response.json();
       
       if (response.ok && data.status === 'success') {
-        setSelectedCrop(data.data);
+        const detail = data.data as CropGuide;
+        setSelectedCrop(detail);
+
+        setGuides((prev) => {
+          const exists = prev.some((item) => item.cropName.toLowerCase() === String(detail.cropName).toLowerCase());
+          if (exists) {
+            return prev;
+          }
+
+          return [...prev, {
+            id: detail.id || `custom-${String(detail.cropName).toLowerCase().replace(/\s+/g, '-')}`,
+            cropName: detail.cropName,
+            overview: detail.overview,
+            yield: detail.yield,
+          }].sort((a, b) => a.cropName.localeCompare(b.cropName));
+        });
+
         if (data.source === 'ai') {
           toast.success(t('Guide generated using AI', 'AI से गाइड तैयार किया गया', 'AI ने मार्गदर्शक तयार केला'));
         }
+        return detail;
       } else {
         toast.error(t('Failed to load crop details', 'फसल विवरण लोड करने में विफल'));
       }
@@ -75,6 +94,8 @@ export default function FarmerGuidePage() {
     } finally {
       setLoadingDetail(false);
     }
+
+    return null;
   }, [language, t]);
 
   const loadGuides = useCallback(async () => {
@@ -127,15 +148,54 @@ export default function FarmerGuidePage() {
       .trim();
   };
 
-  const getGuideLines = (value?: string) => {
+  const getLanguageSpecificText = (value?: string) => {
     const cleaned = cleanGuideText(value);
+    if (!cleaned) return '';
+
+    const sectionRegex = /(EN|HI|MR)\s*:\s*([\s\S]*?)(?=(?:\n\s*)?(?:EN|HI|MR)\s*:|$)/gi;
+    const sections: Partial<Record<'en' | 'hi' | 'mr', string>> = {};
+    let match: RegExpExecArray | null;
+
+    while ((match = sectionRegex.exec(cleaned)) !== null) {
+      const code = match[1].toLowerCase() as 'en' | 'hi' | 'mr';
+      sections[code] = (match[2] || '').trim();
+    }
+
+    if (!sections.en && !sections.hi && !sections.mr) {
+      return language === 'en' ? cleaned : '';
+    }
+
+    return sections[language] || '';
+  };
+
+  const getGuideLines = (value?: string) => {
+    const cleaned = getLanguageSpecificText(value);
     if (!cleaned) return [];
 
     return cleaned
-      .split(/\n|\.\s+/)
+      .split('\n')
       .map((line) => line.trim())
       .filter((line) => line.length > 0)
       .map((line) => line.replace(/^[-•]\s*/, '').trim());
+  };
+
+  const handleAddCrop = async () => {
+    const cleaned = newCropName.trim().replace(/\s+/g, ' ');
+    if (cleaned.length < 2) {
+      toast.error(t('Please enter a valid crop name', 'कृपया सही फसल नाम दर्ज करें', 'कृपया वैध पीक नाव टाका'));
+      return;
+    }
+
+    setAddingCrop(true);
+    try {
+      const detail = await loadCropDetail(cleaned);
+      if (detail) {
+        setNewCropName('');
+        toast.success(t('Crop added successfully', 'फसल सफलतापूर्वक जोड़ी गई', 'पीक यशस्वीरित्या जोडले गेले'));
+      }
+    } finally {
+      setAddingCrop(false);
+    }
   };
 
   const getPreviewText = (value?: string) => {
@@ -218,6 +278,35 @@ export default function FarmerGuidePage() {
               />
             </div>
 
+            <div className="mb-4 space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                {t('Add New Crop', 'नई फसल जोड़ें', 'नवीन पीक जोडा')}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newCropName}
+                  onChange={(e) => setNewCropName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      void handleAddCrop();
+                    }
+                  }}
+                  placeholder={t('e.g., Banana', 'जैसे, केला', 'उदा. केळी')}
+                  className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800 placeholder-gray-400"
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleAddCrop()}
+                  disabled={addingCrop}
+                  className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-60"
+                >
+                  {addingCrop ? t('Adding...', 'जोड़ा जा रहा...', 'जोडत आहे...') : t('Add', 'जोड़ें', 'जोडा')}
+                </button>
+              </div>
+            </div>
+
             {/* Crop List */}
             <div className="space-y-2 max-h-[600px] overflow-y-auto">
               {loading ? (
@@ -240,11 +329,6 @@ export default function FarmerGuidePage() {
                     }`}
                   >
                     <div className="font-medium">{guide.cropName}</div>
-                    {'yield' in guide && typeof guide.yield === 'string' && (
-                      <div className="text-xs text-gray-500 mt-1">
-                        Yield: {guide.yield}
-                      </div>
-                    )}
                   </button>
                 ))
               )}
@@ -277,7 +361,7 @@ export default function FarmerGuidePage() {
                 {'yield' in selectedCrop && typeof selectedCrop.yield === 'string' && (
                   <div className="flex items-center gap-2 text-green-100">
                     <TrendingUp className="w-5 h-5" />
-                    <span className="font-medium">{t('Expected Yield:', 'अपेक्षित उपज:')} {String(selectedCrop.yield)}</span>
+                    <span className="font-medium">{t('Expected Yield:', 'अपेक्षित उपज:', 'अपेक्षित उत्पादन:')} {getPreviewText(selectedCrop.yield)}</span>
                   </div>
                 )}
               </div>

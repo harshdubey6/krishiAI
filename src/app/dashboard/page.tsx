@@ -3,7 +3,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Sprout, CloudSun, TrendingUp, BookOpen, AlertCircle, ArrowRight, Sparkles, Target, Shield, Clock } from 'lucide-react';
+import { Sprout, CloudSun, TrendingUp, BookOpen, AlertCircle, ArrowRight, Sparkles, Target, Shield, Clock, X } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 
 // Define proper type for diagnosis history items
@@ -14,6 +14,10 @@ interface DiagnosisItem {
   severity?: string;
   confidence?: number;
   diagnosis?: string;
+  symptoms?: string;
+  causes?: string[];
+  treatment?: string[];
+  prevention?: string[];
   createdAt: string;
   estimatedCost?: number;
 }
@@ -23,6 +27,7 @@ export default function DashboardPage() {
   const { t } = useLanguage();
   const [recent, setRecent] = useState<DiagnosisItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDiagnosis, setSelectedDiagnosis] = useState<DiagnosisItem | null>(null);
 
   useEffect(() => {
     if (isLoading || !isAuthenticated) {
@@ -137,81 +142,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Quick Actions Grid - Enhanced Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-        {features.map((feature, index) => (
-          <Link
-            key={index}
-            href={feature.href}
-            className="group relative overflow-hidden bg-white rounded-2xl sm:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-transparent active:scale-95 sm:hover:-translate-y-2"
-          >
-            <div className={`absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${feature.gradient}`}></div>
-
-            <div className="relative p-5 sm:p-8">
-              <div className={`inline-flex ${feature.iconBg} rounded-2xl p-4 sm:p-5 mb-4 sm:mb-5 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-md`}>
-                <div className={`${feature.iconColor} group-hover:text-white transition-colors`}>
-                  {feature.icon}
-                </div>
-              </div>
-
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 group-hover:text-white transition-colors">
-                {feature.title}
-              </h3>
-              <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 group-hover:text-white/80 transition-colors">
-                {feature.description}
-              </p>
-
-              <div className="flex items-center gap-2 text-green-600 group-hover:text-white font-semibold transition-colors text-sm sm:text-base">
-                <span>{t('Get Started', 'शुरू करें')}</span>
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-2 transition-transform" />
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      {/* Feature Highlights */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 sm:p-6 rounded-2xl border border-green-100 shadow-sm hover:shadow-lg transition-shadow">
-          <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-            <div className="p-2 sm:p-3 bg-green-500 rounded-xl shadow-lg">
-              <Target className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </div>
-            <div>
-              <p className="text-xs font-medium text-gray-600">Accuracy</p>
-              <p className="text-xl sm:text-2xl font-bold text-gray-900">95%+</p>
-            </div>
-          </div>
-          <p className="text-xs sm:text-sm text-gray-600">AI-powered crop disease detection</p>
-        </div>
-
-        <div className="bg-gradient-to-br from-blue-50 to-sky-50 p-6 rounded-2xl border border-blue-100 shadow-sm hover:shadow-lg transition-shadow">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 bg-blue-500 rounded-xl shadow-lg">
-              <Shield className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p className="text-xs text-gray-600 font-medium">Protection</p>
-              <p className="text-2xl font-bold text-gray-900">24/7</p>
-            </div>
-          </div>
-          <p className="text-sm text-gray-600">Weather monitoring & alerts</p>
-        </div>
-
-        <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-2xl border border-orange-100 shadow-sm hover:shadow-lg transition-shadow">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 bg-orange-500 rounded-xl shadow-lg">
-              <Clock className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p className="text-xs text-gray-600 font-medium">Response</p>
-              <p className="text-2xl font-bold text-gray-900">Instant</p>
-            </div>
-          </div>
-          <p className="text-sm text-gray-600">Real-time market price updates</p>
-        </div>
-      </div>
-
       {/* Recent Diagnoses - Modern Design */}
       {recent.length > 0 && (
         <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
@@ -236,9 +166,11 @@ export default function DashboardPage() {
           ) : (
             <div className="space-y-4">
               {recent.map((d) => (
-                <div
+                <button
                   key={d.id}
-                  className="group p-4 sm:p-6 bg-gradient-to-br from-gray-50 to-green-50/30 rounded-2xl hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-green-200"
+                  type="button"
+                  onClick={() => setSelectedDiagnosis(d)}
+                  className="group w-full text-left p-4 sm:p-6 bg-gradient-to-br from-gray-50 to-green-50/30 rounded-2xl hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-green-200"
                 >
                   <div className="flex items-start justify-between gap-3 sm:gap-4">
                     <div className="flex-1 min-w-0">
@@ -282,10 +214,148 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Quick Actions Grid - Enhanced Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        {features.map((feature, index) => (
+          <Link
+            key={index}
+            href={feature.href}
+            className="group relative overflow-hidden bg-white rounded-2xl sm:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-transparent active:scale-95 sm:hover:-translate-y-2"
+          >
+            <div className={`absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${feature.gradient}`}></div>
+
+            <div className="relative p-5 sm:p-8">
+              <div className={`inline-flex ${feature.iconBg} rounded-2xl p-4 sm:p-5 mb-4 sm:mb-5 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-md`}>
+                <div className={`${feature.iconColor} group-hover:text-white transition-colors`}>
+                  {feature.icon}
+                </div>
+              </div>
+
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 group-hover:text-white transition-colors">
+                {feature.title}
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 group-hover:text-white/80 transition-colors">
+                {feature.description}
+              </p>
+
+              <div className="flex items-center gap-2 text-green-600 group-hover:text-white font-semibold transition-colors text-sm sm:text-base">
+                <span>{t('Get Started', 'शुरू करें')}</span>
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-2 transition-transform" />
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {selectedDiagnosis && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setSelectedDiagnosis(null)}
+        >
+          <div
+            className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl border border-gray-200"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between p-5 border-b border-gray-200 sticky top-0 bg-white">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {selectedDiagnosis.cropType || selectedDiagnosis.plantType || t('Crop', 'फसल')}
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  {new Date(selectedDiagnosis.createdAt).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedDiagnosis(null)}
+                className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                {selectedDiagnosis.severity && (
+                  <span className={`text-xs px-3 py-1.5 rounded-full font-semibold shadow-sm ${selectedDiagnosis.severity === 'severe' ? 'bg-red-500 text-white' :
+                    selectedDiagnosis.severity === 'moderate' ? 'bg-yellow-500 text-white' :
+                      'bg-green-500 text-white'
+                    }`}>
+                    {selectedDiagnosis.severity.toUpperCase()}
+                  </span>
+                )}
+                {typeof selectedDiagnosis.confidence === 'number' && (
+                  <span className="text-xs px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full font-semibold">
+                    {Math.round(selectedDiagnosis.confidence)}% {t('confident', 'विश्वास')}
+                  </span>
+                )}
+                {typeof selectedDiagnosis.estimatedCost === 'number' && (
+                  <span className="text-xs px-3 py-1.5 bg-green-100 text-green-700 rounded-full font-semibold">
+                    ₹{selectedDiagnosis.estimatedCost.toLocaleString('en-IN')} {t('est. cost', 'अनुमानित लागत')}
+                  </span>
+                )}
+              </div>
+
+              {selectedDiagnosis.symptoms && (
+                <div className="rounded-xl border border-gray-200 p-4 bg-gray-50">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-2">{t('Symptoms', 'लक्षण')}</h4>
+                  <p className="text-gray-700 whitespace-pre-wrap">{selectedDiagnosis.symptoms}</p>
+                </div>
+              )}
+
+              <div className="rounded-xl border border-green-200 p-4 bg-green-50">
+                <h4 className="text-sm font-semibold text-green-900 mb-2">{t('Diagnosis', 'निदान')}</h4>
+                <p className="text-green-800 whitespace-pre-wrap">{selectedDiagnosis.diagnosis || t('No diagnosis available', 'निदान उपलब्ध नहीं है')}</p>
+              </div>
+
+              {Array.isArray(selectedDiagnosis.causes) && selectedDiagnosis.causes.length > 0 && (
+                <div className="rounded-xl border border-gray-200 p-4 bg-white">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-2">{t('Causes', 'कारण')}</h4>
+                  <ul className="list-disc pl-5 space-y-1 text-gray-700">
+                    {selectedDiagnosis.causes.map((item, index) => (
+                      <li key={`${item}-${index}`}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {Array.isArray(selectedDiagnosis.treatment) && selectedDiagnosis.treatment.length > 0 && (
+                <div className="rounded-xl border border-gray-200 p-4 bg-white">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-2">{t('Treatment', 'उपचार')}</h4>
+                  <ul className="list-disc pl-5 space-y-1 text-gray-700">
+                    {selectedDiagnosis.treatment.map((item, index) => (
+                      <li key={`${item}-${index}`}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {Array.isArray(selectedDiagnosis.prevention) && selectedDiagnosis.prevention.length > 0 && (
+                <div className="rounded-xl border border-gray-200 p-4 bg-white">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-2">{t('Prevention', 'रोकथाम')}</h4>
+                  <ul className="list-disc pl-5 space-y-1 text-gray-700">
+                    {selectedDiagnosis.prevention.map((item, index) => (
+                      <li key={`${item}-${index}`}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

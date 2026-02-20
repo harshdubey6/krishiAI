@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Sprout, CloudSun, TrendingUp, BookOpen, Users, Smartphone } from "lucide-react";
 import LanguageToggle from "@/components/LanguageToggle";
 import { useLanguage } from "@/components/providers/LanguageProvider";
@@ -10,12 +11,44 @@ import AuthModal from '@/components/AuthModal';
 
 export default function Home() {
   const { t } = useLanguage();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const authParam = searchParams.get('auth');
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+
+  useEffect(() => {
+    if (authParam === 'login' || authParam === 'register') {
+      setAuthMode(authParam);
+      setAuthOpen(true);
+      return;
+    }
+
+    if (searchParams.get('callbackUrl')) {
+      setAuthMode('login');
+      setAuthOpen(true);
+    }
+  }, [authParam, searchParams]);
 
   const openAuth = (mode: 'login' | 'register') => {
     setAuthMode(mode);
     setAuthOpen(true);
+  };
+
+  const closeAuth = () => {
+    setAuthOpen(false);
+
+    if (!searchParams.get('auth') && !searchParams.get('callbackUrl')) {
+      return;
+    }
+
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.delete('auth');
+    nextParams.delete('callbackUrl');
+    const nextQuery = nextParams.toString();
+
+    router.replace(nextQuery ? `/?${nextQuery}` : '/', { scroll: false });
   };
 
   const features = [
@@ -292,7 +325,7 @@ export default function Home() {
         </div>
       </footer>
 
-      <AuthModal open={authOpen} mode={authMode} onClose={() => setAuthOpen(false)} />
+      <AuthModal open={authOpen} mode={authMode} onClose={closeAuth} callbackUrl={callbackUrl} />
     </div>
   );
 }
