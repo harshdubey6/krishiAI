@@ -4,11 +4,15 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
-    const { email, password, name } = await req.json();
+    const { email, password, name, firstName, lastName } = await req.json();
+    const normalizedFirstName = typeof firstName === 'string' ? firstName.trim() : '';
+    const normalizedLastName = typeof lastName === 'string' ? lastName.trim() : '';
+    const normalizedName = typeof name === 'string' ? name.trim() : '';
+    const finalName = `${normalizedFirstName} ${normalizedLastName}`.trim() || normalizedName;
 
-    if (!email || !password) {
+    if (!email || !password || !finalName) {
       return NextResponse.json(
-        { error: "Missing email or password" },
+        { error: "Missing required registration fields" },
         { status: 400 }
       );
     }
@@ -33,7 +37,7 @@ export async function POST(req: Request) {
       data: {
         email,
         password: hashedPassword,
-        name,
+        name: finalName,
       },
     });
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -33,6 +33,7 @@ export default function FarmerGuidePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const hasAutoLoadedCropRef = useRef(false);
   const [expandedSections, setExpandedSections] = useState<{[key: string]: boolean}>({
     overview: true,
     climate: false,
@@ -54,38 +55,7 @@ export default function FarmerGuidePage() {
     }
   }, [status, router, t]);
 
-  // Load crop guides
-  useEffect(() => {
-    if (status === 'authenticated') {
-      loadGuides();
-    }
-  }, [status]);
-
-  const loadGuides = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/crop-guide');
-      const data = await response.json();
-      
-      if (response.ok && data.status === 'success') {
-        const loadedGuides: CropGuide[] = Array.isArray(data.data) ? data.data : [];
-        setGuides(loadedGuides);
-
-        if (loadedGuides.length > 0 && !selectedCrop) {
-          await loadCropDetail(loadedGuides[0].cropName);
-        }
-      } else {
-        toast.error(t('Failed to load crop guides', 'फसल गाइड लोड करने में विफल'));
-      }
-    } catch (error) {
-      console.error('Error loading guides:', error);
-      toast.error(t('Failed to load crop guides', 'फसल गाइड लोड करने में विफल'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadCropDetail = async (cropName: string) => {
+  const loadCropDetail = useCallback(async (cropName: string) => {
     setLoadingDetail(true);
     try {
       const response = await fetch(`/api/crop-guide?crop=${encodeURIComponent(cropName)}&language=${encodeURIComponent(language)}`);
@@ -105,7 +75,39 @@ export default function FarmerGuidePage() {
     } finally {
       setLoadingDetail(false);
     }
-  };
+  }, [language, t]);
+
+  const loadGuides = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/crop-guide');
+      const data = await response.json();
+      
+      if (response.ok && data.status === 'success') {
+        const loadedGuides: CropGuide[] = Array.isArray(data.data) ? data.data : [];
+        setGuides(loadedGuides);
+
+        if (loadedGuides.length > 0 && !hasAutoLoadedCropRef.current) {
+          hasAutoLoadedCropRef.current = true;
+          await loadCropDetail(loadedGuides[0].cropName);
+        }
+      } else {
+        toast.error(t('Failed to load crop guides', 'फसल गाइड लोड करने में विफल'));
+      }
+    } catch (error) {
+      console.error('Error loading guides:', error);
+      toast.error(t('Failed to load crop guides', 'फसल गाइड लोड करने में विफल'));
+    } finally {
+      setLoading(false);
+    }
+  }, [loadCropDetail, t]);
+
+  // Load crop guides
+  useEffect(() => {
+    if (status === 'authenticated') {
+      loadGuides();
+    }
+  }, [status, loadGuides]);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
