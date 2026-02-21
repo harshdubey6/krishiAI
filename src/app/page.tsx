@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Sprout, CloudSun, TrendingUp, BookOpen, Users, Smartphone } from "lucide-react";
+import { Sprout, CloudSun, TrendingUp, BookOpen, Smartphone, Users } from "lucide-react";
 import LanguageToggle from "@/components/LanguageToggle";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import AuthModal from '@/components/AuthModal';
@@ -99,20 +99,20 @@ export default function Home() {
       description: t('Expert knowledge, video tutorials, and best practices', 'विशेषज्ञ ज्ञान, वीडियो ट्यूटोरियल और सर्वोत्तम तरीके', 'तज्ज्ञ ज्ञान, व्हिडिओ ट्युटोरियल्स आणि सर्वोत्तम पद्धती')
     },
     {
-      icon: <Users className="w-8 h-8 text-red-600" />,
-      title: t('Sell Direct', 'सीधे बेचें', 'थेट विक्री'),
-      description: t('Connect directly with buyers, eliminate middlemen', 'खरीदारों से सीधे जुड़ें, बिचौलियों को हटाएं', 'खरेदीदारांशी थेट जोडा, मध्यस्थ टाळा')
-    },
-    {
       icon: <Smartphone className="w-8 h-8 text-indigo-600" />,
       title: t('Mobile Friendly', 'मोबाइल फ्रेंडली', 'मोबाइल फ्रेंडली'),
       description: t('Works on any device, even with slow internet', 'किसी भी डिवाइस पर चलता है, धीमे इंटरनेट में भी', 'कोणत्याही डिव्हाइसवर चालते, कमी इंटरनेटवरही')
+    },
+    {
+      icon: <Users className="w-8 h-8 text-teal-600" />,
+      title: t('Farmer Community', 'किसान समुदाय', 'शेतकरी समुदाय'),
+      description: t('Learn from fellow farmers and shared field experiences', 'अन्य किसानों के अनुभवों से सीखें और ज्ञान साझा करें', 'इतर शेतकऱ्यांच्या अनुभवांतून शिका आणि ज्ञान शेअर करा')
     }
   ];
 
   const problems = [
     { problem: t('Cannot identify crop disease on time', 'फसल की बीमारी की पहचान समय पर नहीं होती', 'पीकाचा रोग वेळेवर ओळखता येत नाही'), solution: t('Get instant answer from AI', 'AI से तुरंत जवाब मिलेगा', 'AI कडून त्वरित उत्तर मिळेल') },
-    { problem: t('Middlemen take most profit', 'बिचौलिए ज्यादा कमाते हैं', 'मध्यस्थ जास्त नफा घेतात'), solution: t('Connect directly with buyers', 'सीधे खरीदार से जुड़ें', 'खरेदीदारांशी थेट जोडा') },
+    { problem: t('Lack of practical farming guidance', 'व्यावहारिक खेती मार्गदर्शन की कमी', 'व्यावहारिक शेती मार्गदर्शनाची कमतरता'), solution: t('Follow step-by-step farming guides', 'स्टेप-बाय-स्टेप खेती गाइड का पालन करें', 'स्टेप-बाय-स्टेप शेती मार्गदर्शकांचे पालन करा') },
     { problem: t('No reliable weather updates', 'मौसम की सही जानकारी नहीं मिलती', 'विश्वसनीय हवामान माहिती मिळत नाही'), solution: t('Get 15-day forecast', '15 दिन का पूर्वानुमान पाएं', '15 दिवसांचा अंदाज मिळवा') },
     { problem: t('Unable to get fair market rates', 'सही भाव नहीं मिलता', 'योग्य भाव मिळत नाही'), solution: t('Check live mandi rates', 'लाइव मंडी रेट देखें', 'लाइव्ह मंडई दर पहा') }
   ];
@@ -157,7 +157,7 @@ export default function Home() {
                 </span>
               </h1>
               <p className="mt-4 sm:mt-6 text-base sm:text-lg lg:text-xl text-gray-700 leading-relaxed">
-                {t('Identify crop diseases • Connect directly with buyers • Get weather updates • Get fair prices', 'फसल की बीमारी पहचानें • सीधे खरीदार से जुड़ें • मौसम की जानकारी • सही भाव पाएं', 'पीक रोग ओळखा • खरेदीदारांशी थेट जोडा • हवामान माहिती मिळवा • योग्य भाव मिळवा')}
+                {t('Identify crop diseases • Use farmer guides • Get weather updates • Get fair prices', 'फसल की बीमारी पहचानें • किसान गाइड का उपयोग करें • मौसम की जानकारी • सही भाव पाएं', 'पीक रोग ओळखा • शेतकरी मार्गदर्शक वापरा • हवामान माहिती मिळवा • योग्य भाव मिळवा')}
               </p>
               <p className="mt-2 text-sm sm:text-base text-gray-600">
                 {t('Empowering Farmers with AI-Powered Agriculture Platform', 'AI आधारित कृषि प्लेटफॉर्म से किसानों को सशक्त बनाना', 'AI आधारित कृषी प्लॅटफॉर्मद्वारे शेतकऱ्यांना सक्षम बनवणे')}
