@@ -260,7 +260,7 @@ export default function DashboardPage() {
           onClick={() => setSelectedDiagnosis(null)}
         >
           <div
-            className="w-full max-w-3xl h-[100dvh] sm:h-auto sm:max-h-[90vh] overflow-y-auto rounded-none sm:rounded-2xl bg-white shadow-2xl border-0 sm:border sm:border-gray-200"
+            className="w-full max-w-3xl h-full max-h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto rounded-none sm:rounded-2xl bg-white shadow-2xl border-0 sm:border sm:border-gray-200"
             onClick={(event) => event.stopPropagation()}
             role="dialog"
             aria-modal="true"
