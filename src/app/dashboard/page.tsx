@@ -256,19 +256,21 @@ export default function DashboardPage() {
 
       {selectedDiagnosis && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4"
           onClick={() => setSelectedDiagnosis(null)}
         >
           <div
-            className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl border border-gray-200"
+            className="w-full max-w-3xl h-[100dvh] sm:h-auto sm:max-h-[90vh] overflow-y-auto rounded-none sm:rounded-2xl bg-white shadow-2xl border-0 sm:border sm:border-gray-200"
             onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
           >
-            <div className="flex items-start justify-between p-5 border-b border-gray-200 sticky top-0 bg-white">
+            <div className="flex items-start justify-between p-4 sm:p-5 border-b border-gray-200 sticky top-0 bg-white">
               <div>
-                <h3 className="text-2xl font-bold text-gray-900">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 break-words pr-2">
                   {selectedDiagnosis.cropType || selectedDiagnosis.plantType || t('Crop', 'फसल')}
                 </h3>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-xs sm:text-sm text-gray-500 mt-1">
                   {new Date(selectedDiagnosis.createdAt).toLocaleString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -288,7 +290,7 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            <div className="p-5 space-y-4">
+            <div className="p-4 sm:p-5 space-y-4">
               <div className="flex flex-wrap items-center gap-2">
                 {selectedDiagnosis.severity && (
                   <span className={`text-xs px-3 py-1.5 rounded-full font-semibold shadow-sm ${selectedDiagnosis.severity === 'severe' ? 'bg-red-500 text-white' :
@@ -311,21 +313,21 @@ export default function DashboardPage() {
               </div>
 
               {selectedDiagnosis.symptoms && (
-                <div className="rounded-xl border border-gray-200 p-4 bg-gray-50">
+                <div className="rounded-xl border border-gray-200 p-3 sm:p-4 bg-gray-50">
                   <h4 className="text-sm font-semibold text-gray-900 mb-2">{t('Symptoms', 'लक्षण')}</h4>
-                  <p className="text-gray-700 whitespace-pre-wrap">{selectedDiagnosis.symptoms}</p>
+                  <p className="text-sm sm:text-base text-gray-700 whitespace-pre-wrap">{selectedDiagnosis.symptoms}</p>
                 </div>
               )}
 
-              <div className="rounded-xl border border-green-200 p-4 bg-green-50">
+              <div className="rounded-xl border border-green-200 p-3 sm:p-4 bg-green-50">
                 <h4 className="text-sm font-semibold text-green-900 mb-2">{t('Diagnosis', 'निदान')}</h4>
-                <p className="text-green-800 whitespace-pre-wrap">{selectedDiagnosis.diagnosis || t('No diagnosis available', 'निदान उपलब्ध नहीं है')}</p>
+                <p className="text-sm sm:text-base text-green-800 whitespace-pre-wrap">{selectedDiagnosis.diagnosis || t('No diagnosis available', 'निदान उपलब्ध नहीं है')}</p>
               </div>
 
               {Array.isArray(selectedDiagnosis.causes) && selectedDiagnosis.causes.length > 0 && (
-                <div className="rounded-xl border border-gray-200 p-4 bg-white">
+                <div className="rounded-xl border border-gray-200 p-3 sm:p-4 bg-white">
                   <h4 className="text-sm font-semibold text-gray-900 mb-2">{t('Causes', 'कारण')}</h4>
-                  <ul className="list-disc pl-5 space-y-1 text-gray-700">
+                  <ul className="list-disc pl-5 space-y-1 text-sm sm:text-base text-gray-700">
                     {selectedDiagnosis.causes.map((item, index) => (
                       <li key={`${item}-${index}`}>{item}</li>
                     ))}
@@ -334,9 +336,9 @@ export default function DashboardPage() {
               )}
 
               {Array.isArray(selectedDiagnosis.treatment) && selectedDiagnosis.treatment.length > 0 && (
-                <div className="rounded-xl border border-gray-200 p-4 bg-white">
+                <div className="rounded-xl border border-gray-200 p-3 sm:p-4 bg-white">
                   <h4 className="text-sm font-semibold text-gray-900 mb-2">{t('Treatment', 'उपचार')}</h4>
-                  <ul className="list-disc pl-5 space-y-1 text-gray-700">
+                  <ul className="list-disc pl-5 space-y-1 text-sm sm:text-base text-gray-700">
                     {selectedDiagnosis.treatment.map((item, index) => (
                       <li key={`${item}-${index}`}>{item}</li>
                     ))}
@@ -345,9 +347,9 @@ export default function DashboardPage() {
               )}
 
               {Array.isArray(selectedDiagnosis.prevention) && selectedDiagnosis.prevention.length > 0 && (
-                <div className="rounded-xl border border-gray-200 p-4 bg-white">
+                <div className="rounded-xl border border-gray-200 p-3 sm:p-4 bg-white">
                   <h4 className="text-sm font-semibold text-gray-900 mb-2">{t('Prevention', 'रोकथाम')}</h4>
-                  <ul className="list-disc pl-5 space-y-1 text-gray-700">
+                  <ul className="list-disc pl-5 space-y-1 text-sm sm:text-base text-gray-700">
                     {selectedDiagnosis.prevention.map((item, index) => (
                       <li key={`${item}-${index}`}>{item}</li>
                     ))}
