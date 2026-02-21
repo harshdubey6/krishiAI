@@ -165,7 +165,7 @@ export default function MarketPricesPage() {
                 value={searchState}
                 onChange={(e) => setSearchState(e.target.value)}
                 placeholder="e.g., Punjab"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-gray-900 placeholder-gray-400"
                 onKeyPress={(e) => e.key === 'Enter' && fetchPrices()}
               />
             </div>
