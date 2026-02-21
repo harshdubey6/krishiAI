@@ -3,6 +3,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { createPortal } from 'react-dom';
 import { Sprout, CloudSun, TrendingUp, BookOpen, AlertCircle, ArrowRight, Sparkles, Shield, Clock, X } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 
@@ -28,6 +29,11 @@ export default function DashboardPage() {
   const [recent, setRecent] = useState<DiagnosisItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDiagnosis, setSelectedDiagnosis] = useState<DiagnosisItem | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     if (isLoading || !isAuthenticated) {
@@ -254,7 +260,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {selectedDiagnosis && (
+      {isClient && selectedDiagnosis && createPortal(
         <div
           className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4"
           onClick={() => setSelectedDiagnosis(null)}
@@ -358,7 +364,8 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Empty State for New Users */}
