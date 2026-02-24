@@ -220,6 +220,16 @@ export default function DiagnosePage() {
     }
   };
 
+  const getSeverityLabel = (severity?: unknown): string => {
+    if (!severity || typeof severity !== 'string') return t('Unknown', 'अज्ञात', 'अज्ञात');
+    const s = severity.trim().toLowerCase();
+    if (s.includes('mild') || s.includes('हल्का') || s.includes('हलकी')) return t('Mild', 'हल्का', 'हलकी');
+    if (s.includes('moderate') || s.includes('medium') || s.includes('मध्यम')) return t('Moderate', 'मध्यम', 'मध्यम');
+    if (s.includes('severe') || s.includes('high') || s.includes('गंभीर')) return t('Severe', 'गंभीर', 'गंभीर');
+    // fallback: return first word only
+    return severity.trim().split(/[.\s,]/)[0] || t('Unknown', 'अज्ञात', 'अज्ञात');
+  };
+
   const getSeverityColor = (severity?: unknown) => {
     if (!severity || typeof severity !== 'string') return 'bg-gray-100 text-gray-800';
 
@@ -500,11 +510,14 @@ export default function DiagnosePage() {
                   <AlertTriangle className="w-5 h-5 text-orange-600" />
                   <span className="text-sm font-medium">{t('Severity', 'गंभीरता', 'तीव्रता')}</span>
                 </div>
-                <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold ${getSeverityColor(diagnosis.severity)}`}>
-                  {getSeverityIcon(diagnosis.severity)}
-                  <span className="capitalize">{typeof diagnosis.severity === 'string' ? diagnosis.severity : t('Unknown', 'अज्ञात', 'अज्ञात')}</span>
+                <div className="text-2xl font-bold text-gray-900">
+                  {getSeverityLabel(diagnosis.severity)}
                 </div>
               </div>
+              <p className={`text-xs font-medium mt-3 px-2.5 py-1 rounded-full inline-flex items-center gap-1 ${getSeverityColor(diagnosis.severity)}`}>
+                {getSeverityIcon(diagnosis.severity)}
+                {t('Disease level', 'रोग स्तर', 'रोग पातळी')}
+              </p>
             </div>
 
             <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-200">

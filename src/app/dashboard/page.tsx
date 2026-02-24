@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createPortal } from 'react-dom';
-import { Sprout, CloudSun, TrendingUp, BookOpen, AlertCircle, ArrowRight, Sparkles, Shield, Clock, X } from 'lucide-react';
+import { Sprout, CloudSun, TrendingUp, BookOpen, AlertCircle, ArrowRight, Sparkles, Shield, Clock, X, Globe } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 
 // Define proper type for diagnosis history items
@@ -114,6 +114,16 @@ export default function DashboardPage() {
       iconBg: 'bg-purple-100',
       iconColor: 'text-purple-600',
       hoverGradient: 'hover:from-purple-500 hover:via-purple-600 hover:to-indigo-600'
+    },
+    {
+      title: t('Market Resources', 'मार्केट संसाधन'),
+      description: t('Trusted external agri websites', 'विश्वसनीय बाहरी कृषि वेबसाइटें'),
+      icon: <Globe className="w-10 h-10" />,
+      href: '/dashboard/resources',
+      gradient: 'from-teal-400 via-teal-500 to-cyan-600',
+      iconBg: 'bg-teal-100',
+      iconColor: 'text-teal-600',
+      hoverGradient: 'hover:from-teal-500 hover:via-teal-600 hover:to-cyan-700'
     }
   ];
 
@@ -126,10 +136,6 @@ export default function DashboardPage() {
         <div className="relative px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-12">
           <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
             <div className="flex-1 w-full">
-              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-3 sm:mb-4">
-                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-300" />
-                <span className="text-white text-xs sm:text-sm font-medium">KrishiAI Platform</span>
-              </div>
               <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 text-white drop-shadow-lg break-words">
                 {t('Hello,', 'नमस्ते,')} <span className="text-yellow-300">{session?.user?.name?.split(' ')[0] || t('Farmer', 'किसान भाई')}</span>!
               </h1>
@@ -138,12 +144,7 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="w-full sm:w-auto">
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 border border-white/30">
-                <div className="text-white/80 text-xs font-medium mb-1">Total Scans</div>
-                <div className="text-2xl sm:text-3xl font-bold text-white">{recent.length}</div>
-              </div>
-            </div>
+
           </div>
         </div>
       </div>
@@ -185,23 +186,12 @@ export default function DashboardPage() {
                           <Sprout className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
                           <h3 className="font-bold text-base sm:text-lg text-gray-900">{d.cropType || d.plantType}</h3>
                         </div>
-                        {d.severity && (
-                          <span className={`text-xs px-3 py-1.5 rounded-full font-semibold shadow-sm ${d.severity === 'severe' ? 'bg-red-500 text-white' :
-                            d.severity === 'moderate' ? 'bg-yellow-500 text-white' :
-                              'bg-green-500 text-white'
-                            }`}>
-                            {d.severity.toUpperCase()}
-                          </span>
-                        )}
                         {d.confidence && (
                           <span className="text-xs px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full font-semibold">
                             {Math.round(d.confidence)}% confident
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-700 mb-3 line-clamp-2 leading-relaxed">
-                        {d.diagnosis?.substring(0, 150)}...
-                      </p>
                       <div className="flex items-center gap-4 text-xs text-gray-500">
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
@@ -228,7 +218,7 @@ export default function DashboardPage() {
       )}
 
       {/* Quick Actions Grid - Enhanced Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 sm:gap-6 mb-6 sm:mb-8">
         {features.map((feature, index) => (
           <Link
             key={index}
@@ -298,14 +288,6 @@ export default function DashboardPage() {
 
             <div className="p-4 sm:p-5 space-y-4">
               <div className="flex flex-wrap items-center gap-2">
-                {selectedDiagnosis.severity && (
-                  <span className={`text-xs px-3 py-1.5 rounded-full font-semibold shadow-sm ${selectedDiagnosis.severity === 'severe' ? 'bg-red-500 text-white' :
-                    selectedDiagnosis.severity === 'moderate' ? 'bg-yellow-500 text-white' :
-                      'bg-green-500 text-white'
-                    }`}>
-                    {selectedDiagnosis.severity.toUpperCase()}
-                  </span>
-                )}
                 {typeof selectedDiagnosis.confidence === 'number' && (
                   <span className="text-xs px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full font-semibold">
                     {Math.round(selectedDiagnosis.confidence)}% {t('confident', 'विश्वास')}

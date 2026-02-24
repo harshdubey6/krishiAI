@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Sprout, CloudSun, TrendingUp, BookOpen, Smartphone, Users } from "lucide-react";
+import { Sprout, CloudSun, TrendingUp, BookOpen, Smartphone, Globe } from "lucide-react";
 import LanguageToggle from "@/components/LanguageToggle";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import AuthModal from '@/components/AuthModal';
@@ -104,9 +104,9 @@ export default function Home() {
       description: t('Works on any device, even with slow internet', 'किसी भी डिवाइस पर चलता है, धीमे इंटरनेट में भी', 'कोणत्याही डिव्हाइसवर चालते, कमी इंटरनेटवरही')
     },
     {
-      icon: <Users className="w-8 h-8 text-teal-600" />,
-      title: t('Farmer Community', 'किसान समुदाय', 'शेतकरी समुदाय'),
-      description: t('Learn from fellow farmers and shared field experiences', 'अन्य किसानों के अनुभवों से सीखें और ज्ञान साझा करें', 'इतर शेतकऱ्यांच्या अनुभवांतून शिका आणि ज्ञान शेअर करा')
+      icon: <Globe className="w-8 h-8 text-teal-600" />,
+      title: t('Market Resources', 'मार्केट संसाधन', 'मार्केट संसाधने'),
+      description: t('Direct links to trusted government portals, loan schemes, and agri-marketplaces', 'सरकारी पोर्टल, कर्ज योजनाओं और कृषि बाजारों के सीधे लिंक', 'सरकारी पोर्टल, कर्ज योजना आणि कृषी बाजारांचे थेट दुवे')
     }
   ];
 

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
-import { Home, Camera, Cloud, TrendingUp, BookOpen, LogOut, Leaf } from 'lucide-react';
+import { Home, Camera, Cloud, TrendingUp, BookOpen, LogOut, Leaf, Globe } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 
 interface NavItem {
@@ -57,6 +57,11 @@ export default function Sidebar({ onNavigate }: SidebarProps = {}) {
       name: t('Farmer Guide', 'किसान मार्गदर्शिका', 'शेतकरी मार्गदर्शक'),
       href: '/dashboard/guide',
       icon: <BookOpen className="w-6 h-6" />,
+    },
+    {
+      name: t('Market Resources', 'मार्केट संसाधन', 'मार्केट संसाधने'),
+      href: '/dashboard/resources',
+      icon: <Globe className="w-6 h-6" />,
     },
   ];
 
